@@ -1,4 +1,4 @@
-package server
+package jb.server
 
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession

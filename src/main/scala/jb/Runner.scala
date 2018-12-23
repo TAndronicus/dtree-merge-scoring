@@ -1,22 +1,17 @@
+package jb
+
+import jb.io.FileReader
+import jb.selector.Selector
 import org.apache.spark.ml.classification.DecisionTreeClassifier
 import org.apache.spark.ml.evaluation.{BinaryClassificationEvaluator, MulticlassClassificationEvaluator}
-import org.apache.spark.ml.feature.ChiSqSelector
 
 object Runner {
 
   def main(args: Array[String]): Unit = {
 
     val vectorizedInput = FileReader.getVectorizedInput("A/biodeg.csv", "csv")
+    val dat = Selector.select_chi_sq(vectorizedInput)
 
-    val selector = new ChiSqSelector().
-      setNumTopFeatures(2).
-      setFeaturesCol("sparseFeatures").
-      setLabelCol("label").
-      setOutputCol("selectedFeatures")
-
-    val selectedInput = selector.fit(vectorizedInput).transform(vectorizedInput)
-
-    val dat = selectedInput.select("selectedFeatures", "label").withColumnRenamed("selectedFeatures", "features")
     val Array(trainingData, testData) = dat.randomSplit(Array(0.9, 0.1))
 
     val dt = new DecisionTreeClassifier().setLabelCol("label").setFeaturesCol("features")
