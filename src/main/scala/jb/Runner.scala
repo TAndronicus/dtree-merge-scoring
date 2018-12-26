@@ -33,20 +33,14 @@ object Runner {
     val featureSelector = Selector.select_chi_sq()
     val dataPrepPipeline = new Pipeline().setStages(Array(featureVectorizer, featureSelector))
     val dataPrepModel = dataPrepPipeline.fit(input)
-    input = dataPrepModel.transform(input).select(
-      Util.getSelectedFeatures(dataPrepModel).map(
-        item => col(COL_PREFIX + item)
-      ).+:(col(FEATURES)).+:(col(LABEL)): _*
-    ).persist
+    input = Util.optimizeInput(input, dataPrepModel)
+
     val (mins, maxs) = Util.getExtrema(input, Util.getSelectedFeatures(dataPrepModel))
 
     val subsets = input.randomSplit(IntStream.range(0, nClass + 2).mapToDouble(_ => 1D / (nClass + 2)).toArray)
-    input.unpersist
-    subsets.foreach(_.cache)
-    val trainingSubsets = subsets.take(subsets.length - 2)
-    val cvSubset = subsets(subsets.length - 2)
-    val testSubset = subsets.last
+    Util.recacheInput2Subsets(input, subsets)
 
+    val (trainingSubsets, cvSubset, testSubset) = Util.disposeSubsets(subsets)
     val rootRect = Rect(mins, maxs)
 
     val dt = new DecisionTreeClassifier().setLabelCol(LABEL).setFeaturesCol(FEATURES)

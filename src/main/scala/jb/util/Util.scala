@@ -1,9 +1,10 @@
 package jb.util
 
+import jb.util.Const._
 import org.apache.spark.ml.PipelineModel
 import org.apache.spark.ml.feature.ChiSqSelectorModel
 import org.apache.spark.sql.DataFrame
-import jb.util.Const._
+import org.apache.spark.sql.functions.col
 
 object Util {
 
@@ -20,6 +21,26 @@ object Util {
 
   def getSelectedFeatures(dataPrepModel: PipelineModel): Array[Int] = {
     dataPrepModel.stages(1).asInstanceOf[ChiSqSelectorModel].selectedFeatures
+  }
+
+  def optimizeInput(input: DataFrame, dataPrepModel: PipelineModel): DataFrame = {
+    dataPrepModel.transform(input).select(
+      Util.getSelectedFeatures(dataPrepModel).map(
+        item => col(COL_PREFIX + item)
+      ).+:(col(FEATURES)).+:(col(LABEL)): _*
+    ).persist
+  }
+
+  def recacheInput2Subsets(input: DataFrame, subsets: Array[DataFrame]): Unit = {
+    input.unpersist
+    subsets.foreach(_.cache)
+  }
+
+  def disposeSubsets(subsets: Array[DataFrame]): (Array[DataFrame], DataFrame, DataFrame) = {
+    val trainingSubsets = subsets.take(subsets.length - 2)
+    val cvSubset = subsets(subsets.length - 2)
+    val testSubset = subsets.last
+    (trainingSubsets, cvSubset, testSubset)
   }
 
 }
