@@ -1,6 +1,6 @@
 package jb.selector
 
-import jb.util.Conf._
+import jb.util.Const._
 import org.apache.spark.ml.Estimator
 import org.apache.spark.ml.feature.{ChiSqSelector, ChiSqSelectorModel}
 

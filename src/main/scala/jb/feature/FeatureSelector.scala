@@ -3,7 +3,7 @@ package jb.feature
 import org.apache.spark.ml.Transformer
 import org.apache.spark.ml.feature.VectorAssembler
 
-import jb.util.Conf._
+import jb.util.Const._
 
 object FeatureSelector {
 

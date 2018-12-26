@@ -1,7 +1,7 @@
 package jb.io
 
 import jb.server.SparkEmbedded
-import jb.util.Conf._
+import jb.util.Const._
 import org.apache.spark.sql.DataFrame
 
 object FileReader {
