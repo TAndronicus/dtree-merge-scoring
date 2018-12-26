@@ -20,8 +20,7 @@ object TreeParser {
 
         dt2rect(leftChild, node.asInstanceOf[InternalNode].leftChild) ++ dt2rect(rightChild, node.asInstanceOf[InternalNode].rightChild)
       case _ =>
-        parent.label = node.prediction
-        Array(parent)
+        Array(parent.copy(label = node.prediction))
     }
   }
 
