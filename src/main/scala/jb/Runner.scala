@@ -40,7 +40,7 @@ object Runner {
     val subsets = input.randomSplit(IntStream.range(0, nClass + 2).mapToDouble(_ => 1D / (nClass + 2)).toArray)
     Util.recacheInput2Subsets(input, subsets)
 
-    val (trainingSubsets, cvSubset, testSubset) = Util.disposeSubsets(subsets)
+    val (trainingSubsets, cvSubset, testSubset) = Util.dispenseSubsets(subsets)
     val rootRect = Rect(mins, maxs)
 
     val dt = new DecisionTreeClassifier().setLabelCol(LABEL).setFeaturesCol(FEATURES)

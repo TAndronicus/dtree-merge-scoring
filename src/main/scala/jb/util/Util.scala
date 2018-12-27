@@ -36,7 +36,7 @@ object Util {
     subsets.foreach(_.cache)
   }
 
-  def disposeSubsets(subsets: Array[DataFrame]): (Array[DataFrame], DataFrame, DataFrame) = {
+  def dispenseSubsets(subsets: Array[DataFrame]): (Array[DataFrame], DataFrame, DataFrame) = {
     val trainingSubsets = subsets.take(subsets.length - 2)
     val cvSubset = subsets(subsets.length - 2)
     val testSubset = subsets.last

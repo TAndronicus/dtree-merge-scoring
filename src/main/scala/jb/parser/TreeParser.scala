@@ -21,7 +21,8 @@ object TreeParser {
         dt2rect(leftChild, node.asInstanceOf[InternalNode].leftChild) ++ dt2rect(rightChild, node.asInstanceOf[InternalNode].rightChild)
       case _ =>
         val vol = parent.min.indices.map(i => parent.max(i) - parent.min(i)).product
-        Array(parent.copy(label = node.prediction, volume = vol))
+        val mid = parent.min.indices.map(i => parent.min(i) + parent.max(i)).toArray
+        Array(parent.copy(label = node.prediction, volume = vol, mid = mid))
     }
   }
 
