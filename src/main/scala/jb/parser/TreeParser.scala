@@ -33,7 +33,7 @@ object TreeParser {
 
   def calculateLabel(mins: Array[Double], maxes: Array[Double], rects: Array[Array[Rect]]): Double = {
     rects.map(
-      geometricalRepresentation => geometricalRepresentation.filter(_.isWithin(mins, maxes))
+      geometricalRepresentation => geometricalRepresentation.filter(_.isWithin(mins, maxes)).groupBy(_.label)
     )
   }
 
