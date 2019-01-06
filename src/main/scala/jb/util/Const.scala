@@ -8,4 +8,6 @@ object Const {
   val PREDICTION = "prediction"
   val COL_PREFIX = "_c"
 
+  val EPSILON = 1e-6
+
 }

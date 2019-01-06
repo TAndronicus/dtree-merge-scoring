@@ -21,6 +21,7 @@ object Runner {
 
   val nClassif = 5
   val nFeatures = 2
+  val division = 10
 
   def main(args: Array[String]): Unit = {
 
@@ -54,10 +55,10 @@ object Runner {
     evaluations.foreach(ev => print(ev + ", "))
 
     val rects = baseModels.map(model => TreeParser.dt2rect(rootRect, model.rootNode))
-    rects.foreach(baseRects => {
-      print("\nBase clf\n")
-      baseRects.foreach(rect => print(rect.toString + "\n "))
-    })
+//    rects.foreach(baseRects => {
+//      print("\nBase clf\n")
+//      baseRects.foreach(rect => print(rect.toString + "\n "))
+//    })
 
     print("Time take/n: " + ChronoUnit.MILLIS.between(start, LocalTime.now))
 
