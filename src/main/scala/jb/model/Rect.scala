@@ -2,8 +2,15 @@ package jb.model
 
 import java.util.stream.IntStream
 
-case class Rect(var min: Array[Double], var max: Array[Double], var label: Double = 0D, var mid: Array[Double] = Array.emptyDoubleArray,
-                var volume: Double = 0D) {
+case class Rect(var min: Array[Double], var max: Array[Double], var label: Double = 0D) {
+
+  def mid(): Array[Double] = {
+    min.indices.map(i => (max(i) + min(i)) / 2).toArray
+  }
+
+  def volume: Double = {
+    min.indices.map(i => max(i) - min(i)).product
+  }
 
   def isWithin(mins: Array[Double], maxes: Array[Double]): Boolean = {
     if (mins.length != min.length) throw new RuntimeException("Sizes don't match")

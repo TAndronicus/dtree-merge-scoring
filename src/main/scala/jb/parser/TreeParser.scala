@@ -1,10 +1,8 @@
 package jb.parser
 
 import jb.model._
-import org.apache.spark.ml.tree.{ContinuousSplit, InternalNode, Node}
 import jb.util.Const.EPSILON
-import org.apache.spark.ml.classification.DecisionTreeClassificationModel
-import org.apache.spark.mllib.tree.model.{InformationGainStats, Predict, Split}
+import org.apache.spark.ml.tree.{ContinuousSplit, InternalNode, Node}
 
 import scala.math.floor
 
@@ -25,16 +23,15 @@ object TreeParser {
 
         dt2rect(leftChild, node.asInstanceOf[InternalNode].leftChild) ++ dt2rect(rightChild, node.asInstanceOf[InternalNode].rightChild)
       case _ =>
-        val vol = parent.min.indices.map(i => parent.max(i) - parent.min(i)).product
-        val mid = parent.min.indices.map(i => parent.min(i) + parent.max(i)).toArray
-        Array(parent.copy(label = node.prediction, volume = vol, mid = mid))
+        Array(parent.copy(label = node.prediction))
     }
   }
 
   def calculateLabel(mins: Array[Double], maxes: Array[Double], rects: Array[Array[Rect]]): Double = {
-    rects.map(
+    val m = rects.map(
       geometricalRepresentation => geometricalRepresentation.filter(_.isWithin(mins, maxes)).groupBy(_.label)
     )
+    0D
   }
 
   def rect2dt(mins: Array[Double], maxes: Array[Double], elSize: Array[Double], dim: Int, maxDim: Int, rects: Array[Array[Rect]]): SimpleNode = {
