@@ -29,9 +29,7 @@ object TreeParser {
 
   def calculateLabel(mins: Array[Double], maxes: Array[Double], rects: Array[Array[Rect]]): Double = {
     val m = rects.map(
-      geometricalRepresentation => geometricalRepresentation.filter(_.isWithin(mins, maxes)).groupBy(_.label).map(
-        kv => (k, v)
-      )
+      geometricalRepresentation => geometricalRepresentation.filter(_.isWithin(mins, maxes)).groupBy(_.label).mapValues[Double](v => v.map(_.volume).sum).reduce((a1, a2) => if (a1._2 > a2._2) a1 else a2)._1
     )
     0D
   }
