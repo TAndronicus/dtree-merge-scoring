@@ -1,5 +1,6 @@
 package jb
 
+import jb.model.Rect
 import jb.server.SparkEmbedded
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
@@ -16,6 +17,7 @@ object Playground {
 //    s1.except(s2).union(s2.except(s1)).show()
     val a = Array(0, 1, 2)
     print(a.length / 2D)
+    val b = (v: Array[Rect]) => v.map(_.volume).sum
   }
 
 }

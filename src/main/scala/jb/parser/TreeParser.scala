@@ -3,6 +3,7 @@ package jb.parser
 import jb.model._
 import jb.util.Const.EPSILON
 import org.apache.spark.ml.tree.{ContinuousSplit, InternalNode, Node}
+import jb.util.functions.WeightAggregators.sumOfVolumes
 
 import scala.math.floor
 
@@ -31,10 +32,10 @@ object TreeParser {
     val sum = rects.map(
       geometricalRepresentation => geometricalRepresentation.filter(_.isWithin(mins, maxes)) // filtering ones that span the cube
         .groupBy(_.label)
-        .mapValues[Double](v => v.map(_.volume).sum) // sum weights (volumes)
+        .mapValues(sumOfVolumes) // sum weights (volumes)
         .reduce((a1, a2) => if (a1._2 > a2._2) a1 else a2)._1 // choosing label with the greatest value
     ).sum
-    if (sum > rects.length / 2D) 1D else 2D
+    if (sum > rects.length / 2D) 1D else 0D
   }
 
   def rect2dt(mins: Array[Double], maxes: Array[Double], elSize: Array[Double], dim: Int, maxDim: Int, rects: Array[Array[Rect]]): SimpleNode = {
