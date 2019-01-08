@@ -15,9 +15,10 @@ object Playground {
 //    s1.unionAll(s2).except(s1.intersect(s2)).show()
 //    print("### Second ###")
 //    s1.except(s2).union(s2.except(s1)).show()
-    val a = Array(0, 1, 2)
-    print(a.length / 2D)
-    val b = (v: Array[Rect]) => v.map(_.volume).sum
+    var a = Map((1, 2), (3, 4), (4, 5))
+    var b = Map((1, 2), (2, 3), (5, 6))
+    val c = a ++ b
+    print("kurwa")
   }
 
 }

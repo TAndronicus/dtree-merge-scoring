@@ -20,8 +20,7 @@ class TreeParserTest extends FunSuite{
         Rect(Array(1.5, 0), Array(2.5, 2), 1) // is not within 1
       ),
       Array(
-        Rect(Array(0, 0), Array(2, 2), 1),
-        Rect(Array(0, 0), Array(2, 2), 1),
+        Rect(Array(0, 0), Array(2, 2), 1)
       )
     )
     val res = TreeParser.calculateLabel(mins, maxes, rects)

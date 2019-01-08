@@ -22,6 +22,9 @@ class RectTest extends FunSuite{
   test("Is within") {
     val rect = Rect(Array(-1, -1), Array(1, 1))
     assert(rect.isWithin(Array(-.2, -.3), Array(.4, .5)))
+    assert(rect.isWithin(Array(-2, -3), Array(3, 2)))
+    assert(rect.isWithin(Array(0, -2), Array(-2, 0)))
+    assert(!rect.isWithin(Array(1.5, 0), Array(2.5, 1)))
   }
 
 }
