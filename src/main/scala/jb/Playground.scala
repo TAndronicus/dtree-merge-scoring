@@ -14,10 +14,8 @@ object Playground {
 //    s1.unionAll(s2).except(s1.intersect(s2)).show()
 //    print("### Second ###")
 //    s1.except(s2).union(s2.except(s1)).show()
-    val a = Array(0D, 2)
-    val b = Array(1D, 5)
-    var c = (a ++ b).map(_/2)
-    c.foreach(f => print(f))
+    val a = Array(0, 1, 2)
+    print(a.length / 2D)
   }
 
 }

@@ -28,10 +28,13 @@ object TreeParser {
   }
 
   def calculateLabel(mins: Array[Double], maxes: Array[Double], rects: Array[Array[Rect]]): Double = {
-    val m = rects.map(
-      geometricalRepresentation => geometricalRepresentation.filter(_.isWithin(mins, maxes)).groupBy(_.label).mapValues[Double](v => v.map(_.volume).sum).reduce((a1, a2) => if (a1._2 > a2._2) a1 else a2)._1
-    )
-    0D
+    val sum = rects.map(
+      geometricalRepresentation => geometricalRepresentation.filter(_.isWithin(mins, maxes)) // filtering ones that span the cube
+        .groupBy(_.label)
+        .mapValues[Double](v => v.map(_.volume).sum) // sum weights (volumes)
+        .reduce((a1, a2) => if (a1._2 > a2._2) a1 else a2)._1 // choosing label with the greatest value
+    ).sum
+    if (sum > rects.length / 2D) 1D else 2D
   }
 
   def rect2dt(mins: Array[Double], maxes: Array[Double], elSize: Array[Double], dim: Int, maxDim: Int, rects: Array[Array[Rect]]): SimpleNode = {
