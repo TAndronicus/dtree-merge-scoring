@@ -10,11 +10,10 @@ case class Cube(var min: Array[Double], var max: Array[Double], var label: Doubl
     min.indices.map(i => max(i) - min(i)).product
   }
 
-  def isWithin(mins: Array[Double], maxes: Array[Double]): Boolean = {
+  def isWithin(mins: Array[Double], maxes: Array[Double], rowWithin: (Double, Double) => (Double, Double) => Boolean): Boolean = {
     if (mins.length != min.length) throw new RuntimeException("Sizes don't match")
     for (index <- mins.indices) {
-      val av = (mins(index) + maxes(index)) / 2D
-      if (av < min(index) || av > max(index)) return false
+      if (!rowWithin(mins(index), maxes(index))(min(index), max(index))) return false
     }
     true
   }

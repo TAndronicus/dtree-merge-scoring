@@ -13,6 +13,7 @@ import jb.server.SparkEmbedded
 import jb.util.Const._
 import jb.util.Util._
 import jb.util.functions.WeightAggregators._
+import jb.util.functions.WithinDeterminers._
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.DecisionTreeClassifier
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
@@ -54,7 +55,7 @@ object Runner {
     val evaluations = predictions.map(prediction => evaluator.evaluate(prediction))
     evaluations.foreach(ev => print(ev + ", "))
 
-    val treeParser = new TreeParser(sumOfVolumes)
+    val treeParser = new TreeParser(sumOfVolumes, spansMid)
     val rects = baseModels.map(model => treeParser.dt2rect(rootRect, model.rootNode))
     //    rects.foreach(baseRects => {
     //      print("\nBase clf\n")

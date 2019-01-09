@@ -6,7 +6,7 @@ import org.apache.spark.ml.tree.{ContinuousSplit, InternalNode, Node}
 
 import scala.math.floor
 
-class TreeParser(val weightAggregator: Array[Cube] => Double) {
+class TreeParser(val weightAggregator: Array[Cube] => Double, rowWithin: (Double, Double) => (Double, Double) => Boolean) {
 
   def dt2rect(parent: Cube, node: Node): Array[Cube] = {
     node match {
@@ -29,7 +29,7 @@ class TreeParser(val weightAggregator: Array[Cube] => Double) {
 
   def calculateLabel(mins: Array[Double], maxes: Array[Double], rects: Array[Array[Cube]]): Double = {
     rects.map(
-      geometricalRepresentation => geometricalRepresentation.filter(_.isWithin(mins, maxes)) // filtering ones that span the cube
+      geometricalRepresentation => geometricalRepresentation.filter(_.isWithin(mins, maxes, rowWithin)) // filtering ones that span the cube
         .groupBy(_.label)
         .mapValues(weightAggregator) // sum weights (volumes)
         .reduce((a1, a2) => if (a1._2 > a2._2) a1 else a2)._1 // choosing label with the greatest value
