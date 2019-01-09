@@ -10,12 +10,8 @@ case class Cube(var min: Array[Double], var max: Array[Double], var label: Doubl
     min.indices.map(i => max(i) - min(i)).product
   }
 
-  def isWithin(mins: Array[Double], maxes: Array[Double], rowWithin: (Double, Double) => (Double, Double) => Boolean): Boolean = {
-    if (mins.length != min.length) throw new RuntimeException("Sizes don't match")
-    for (index <- mins.indices) {
-      if (!rowWithin(mins(index), maxes(index))(min(index), max(index))) return false
-    }
-    true
+  def isWithin(rowsWithin: (Array[Double], Array[Double]) => Boolean): Boolean = {
+    rowsWithin(min, max)
   }
 
   override def toString: String = "Min: " + min.map(item => item.toString).reduce((s1, s2) => s1 + ", " + s2) + ", Max: " +
