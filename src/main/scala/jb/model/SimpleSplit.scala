@@ -1,4 +1,4 @@
 package jb.model
 
-class SimpleSplit(featureIndex: Int, value: Double) {
+class SimpleSplit(val featureIndex: Int, val value: Double) {
 }

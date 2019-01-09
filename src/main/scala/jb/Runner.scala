@@ -15,7 +15,7 @@ import jb.util.Util._
 import jb.util.functions.WeightAggregators._
 import jb.util.functions.WithinDeterminers._
 import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.classification.DecisionTreeClassifier
+import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, DecisionTreeClassifier}
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
 
 object Runner {
@@ -61,6 +61,7 @@ object Runner {
     //      print("\nBase clf\n")
     //      baseRects.foreach(rect => print(rect.toString + "\n "))
     //    })
+    DecisionTreeClassificationModel
 
     print("Time: " + ChronoUnit.MILLIS.between(start, LocalTime.now))
 
