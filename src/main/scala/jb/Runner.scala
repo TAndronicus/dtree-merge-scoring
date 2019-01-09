@@ -12,10 +12,10 @@ import jb.selector.Selector
 import jb.server.SparkEmbedded
 import jb.util.Const._
 import jb.util.Util._
+import jb.util.functions.WeightAggregators._
 import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, DecisionTreeClassifier}
+import org.apache.spark.ml.classification.DecisionTreeClassifier
 import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
-import org.apache.spark.sql.functions.col
 
 object Runner {
 
@@ -54,11 +54,12 @@ object Runner {
     val evaluations = predictions.map(prediction => evaluator.evaluate(prediction))
     evaluations.foreach(ev => print(ev + ", "))
 
-    val rects = baseModels.map(model => TreeParser.dt2rect(rootRect, model.rootNode))
-//    rects.foreach(baseRects => {
-//      print("\nBase clf\n")
-//      baseRects.foreach(rect => print(rect.toString + "\n "))
-//    })
+    val treeParser = new TreeParser(sumOfVolumes)
+    val rects = baseModels.map(model => treeParser.dt2rect(rootRect, model.rootNode))
+    //    rects.foreach(baseRects => {
+    //      print("\nBase clf\n")
+    //      baseRects.foreach(rect => print(rect.toString + "\n "))
+    //    })
 
     print("Time: " + ChronoUnit.MILLIS.between(start, LocalTime.now))
 

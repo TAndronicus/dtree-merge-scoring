@@ -1,10 +1,11 @@
 import jb.model.Cube
+import jb.util.functions.WeightAggregators._
 import jb.parser.TreeParser
 import org.scalatest.FunSuite
 
 class TreeParserTest extends FunSuite{
 
-  test("labelCalculation") {
+  test("labelCalculation sumOfValues") {
     // given
     val mins = Array(0D, 0D)
     val maxes = Array(2D, 2D)
@@ -23,7 +24,8 @@ class TreeParserTest extends FunSuite{
         Cube(Array(0, 0), Array(2, 2), 1)
       )
     )
-    val res = TreeParser.calculateLabel(mins, maxes, rects)
+    val treeParser = new TreeParser(sumOfVolumes)
+    val res = treeParser.calculateLabel(mins, maxes, rects)
     assert(res == 0D)
   }
 
