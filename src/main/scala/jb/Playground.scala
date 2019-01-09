@@ -1,6 +1,6 @@
 package jb
 
-import jb.model.Rect
+import jb.model.Cube
 import jb.server.SparkEmbedded
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
@@ -17,8 +17,9 @@ object Playground {
 //    s1.except(s2).union(s2.except(s1)).show()
     var a = Map((1, 2), (3, 4), (4, 5))
     var b = Map((1, 2), (2, 3), (5, 6))
-    val c = a ++ b
-    print("kurwa")
+    var c = Set(1, 2, 5, 7)
+    var d = Set(1, 3, 4, 6, 7)
+    print(c ++ d)
   }
 
 }

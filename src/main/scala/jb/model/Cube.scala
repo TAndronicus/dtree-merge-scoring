@@ -1,6 +1,6 @@
 package jb.model
 
-case class Rect(var min: Array[Double], var max: Array[Double], var label: Double = 0D) {
+case class Cube(var min: Array[Double], var max: Array[Double], var label: Double = 0D) {
 
   def mid: Array[Double] = {
     min.indices.map(i => (max(i) + min(i)) / 2D).toArray

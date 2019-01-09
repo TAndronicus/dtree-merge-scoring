@@ -1,9 +1,9 @@
 package jb.util.functions
 
-import jb.model.Rect
+import jb.model.Cube
 
 object WeightAggregators {
 
-  val sumOfVolumes: Array[Rect] => Double = (ar: Array[Rect]) => ar.map(_.volume).sum
+  val sumOfVolumes: Array[Cube] => Double = (ar: Array[Cube]) => ar.map(_.volume).sum
 
 }

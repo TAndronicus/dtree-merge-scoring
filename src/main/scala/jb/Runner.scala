@@ -6,7 +6,7 @@ import java.util.stream.IntStream
 
 import jb.feature.FeatureSelector
 import jb.io.FileReader
-import jb.model.Rect
+import jb.model.Cube
 import jb.parser.TreeParser
 import jb.selector.Selector
 import jb.server.SparkEmbedded
@@ -43,7 +43,7 @@ object Runner {
     recacheInput2Subsets(input, subsets)
 
     val (trainingSubsets, cvSubset, testSubset) = dispenseSubsets(subsets)
-    val rootRect = Rect(mins, maxs)
+    val rootRect = Cube(mins, maxs)
 
     val dt = new DecisionTreeClassifier().setLabelCol(LABEL).setFeaturesCol(FEATURES)
 
@@ -60,7 +60,7 @@ object Runner {
 //      baseRects.foreach(rect => print(rect.toString + "\n "))
 //    })
 
-    print("Time take/n: " + ChronoUnit.MILLIS.between(start, LocalTime.now))
+    print("Time: " + ChronoUnit.MILLIS.between(start, LocalTime.now))
 
     //    val model = pipeline.fit(trainingData)
     //    val prediction = model.transform(testData)

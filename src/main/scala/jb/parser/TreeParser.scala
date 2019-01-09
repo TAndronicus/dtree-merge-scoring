@@ -9,7 +9,7 @@ import scala.math.floor
 
 object TreeParser {
 
-  def dt2rect(parent: Rect, node: Node): Array[Rect] = {
+  def dt2rect(parent: Cube, node: Node): Array[Cube] = {
     node match {
       case _: InternalNode =>
         val interNode = node.asInstanceOf[InternalNode]
@@ -28,19 +28,16 @@ object TreeParser {
     }
   }
 
-  def calculateLabel(mins: Array[Double], maxes: Array[Double], rects: Array[Array[Rect]]): Double = {
-    val sum = rects.map(
+  def calculateLabel(mins: Array[Double], maxes: Array[Double], rects: Array[Array[Cube]]): Double = {
+    rects.map(
       geometricalRepresentation => geometricalRepresentation.filter(_.isWithin(mins, maxes)) // filtering ones that span the cube
         .groupBy(_.label)
         .mapValues(sumOfVolumes) // sum weights (volumes)
-//        .reduce((a1, a2) => if (a1._2 > a2._2) a1 else a2)._1 // choosing label with the greatest value
-    )
-//      .sum
-//    if (sum > rects.length / 2D) 1D else 0D
-    0D
+        .reduce((a1, a2) => if (a1._2 > a2._2) a1 else a2)._1 // choosing label with the greatest value
+    ).groupBy(identity).reduce((l1, l2) => if (l1._2.length > l2._2.length) l1 else l2)._1 // chosing label with the greatest count
   }
 
-  def rect2dt(mins: Array[Double], maxes: Array[Double], elSize: Array[Double], dim: Int, maxDim: Int, rects: Array[Array[Rect]]): SimpleNode = {
+  def rect2dt(mins: Array[Double], maxes: Array[Double], elSize: Array[Double], dim: Int, maxDim: Int, rects: Array[Array[Cube]]): SimpleNode = {
     var diff = maxes(dim) - mins(dim)
     if (diff > elSize(dim) + EPSILON) {
       val mid = mins(dim) + floor(diff / (2 * elSize(dim))) * elSize(dim)
