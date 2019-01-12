@@ -4,9 +4,9 @@ import jb.util.Const._
 import org.apache.spark.ml.Estimator
 import org.apache.spark.ml.feature.{ChiSqSelector, ChiSqSelectorModel}
 
-object Selector {
+object FeatureSelectors {
 
-  def select_chi_sq(nFeatures: Int): Estimator[ChiSqSelectorModel] = {
+  def get_chi_sq_selector(nFeatures: Int): Estimator[ChiSqSelectorModel] = {
     new ChiSqSelector().
       setNumTopFeatures(nFeatures).
       setFeaturesCol(SPARSE_FEATURES).

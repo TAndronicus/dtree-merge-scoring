@@ -7,6 +7,8 @@ object Const {
   val FEATURES = "features"
   val PREDICTION = "prediction"
   val COL_PREFIX = "_c"
+  val COLUMNS2DROP = Array("rawPrediction", "probability")
+  val SPARSE_PREDICTIONS = "sparse_predictions"
 
   val EPSILON = 1e-6
 

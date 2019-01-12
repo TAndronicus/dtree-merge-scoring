@@ -43,4 +43,8 @@ object Util {
     (trainingSubsets, cvSubset, testSubset)
   }
 
+  def getElCubeSize(mins: Array[Double], maxes: Array[Double], division: Int): Array[Double] = {
+    mins.indices.map(i => (maxes(i) - mins(i)) / division).toArray
+  }
+
 }
