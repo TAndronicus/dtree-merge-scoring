@@ -1,6 +1,6 @@
 package jb.model
 
-import jb.util.Const.{FEATURES, LABEL}
+import jb.util.Const.FEATURES
 import org.apache.spark.ml.linalg.DenseVector
 import org.apache.spark.sql.DataFrame
 

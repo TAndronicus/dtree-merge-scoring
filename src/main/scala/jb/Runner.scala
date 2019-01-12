@@ -4,22 +4,20 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 import java.util.stream.IntStream
 
-import jb.vectorizer.FeatureVectorizers.getFeatureVectorizer
+import jb.Tester.{testIAcc, testMvAcc}
 import jb.io.FileReader.getRawInput
 import jb.model.{Cube, IntegratedDecisionTreeModel}
 import jb.parser.TreeParser
+import jb.prediction.Predictions.predictBaseClfs
 import jb.selector.FeatureSelectors
 import jb.server.SparkEmbedded
 import jb.util.Const._
 import jb.util.Util._
 import jb.util.functions.WeightAggregators._
 import jb.util.functions.WithinDeterminers._
+import jb.vectorizer.FeatureVectorizers.getFeatureVectorizer
 import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, DecisionTreeClassifier}
-import org.apache.spark.ml.evaluation.BinaryClassificationEvaluator
-import jb.vectorizer.PredictionVectorizers.getPredictionVectorizer
-import jb.prediction.Predictions.predictBaseClfs
-import jb.Tester.{testMvAcc, testIAcc}
+import org.apache.spark.ml.classification.DecisionTreeClassifier
 
 object Runner {
 

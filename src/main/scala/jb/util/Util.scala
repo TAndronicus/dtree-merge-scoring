@@ -19,16 +19,16 @@ object Util {
     (mins, maxs)
   }
 
-  def getSelectedFeatures(dataPrepModel: PipelineModel): Array[Int] = {
-    dataPrepModel.stages(1).asInstanceOf[ChiSqSelectorModel].selectedFeatures
-  }
-
   def optimizeInput(input: DataFrame, dataPrepModel: PipelineModel): DataFrame = {
     dataPrepModel.transform(input).select(
       Util.getSelectedFeatures(dataPrepModel).map(
         item => col(COL_PREFIX + item)
       ).+:(col(FEATURES)).+:(col(LABEL)): _*
     ).persist
+  }
+
+  def getSelectedFeatures(dataPrepModel: PipelineModel): Array[Int] = {
+    dataPrepModel.stages(1).asInstanceOf[ChiSqSelectorModel].selectedFeatures
   }
 
   def recacheInput2Subsets(input: DataFrame, subsets: Array[DataFrame]): Unit = {

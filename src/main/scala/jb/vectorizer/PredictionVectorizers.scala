@@ -1,9 +1,8 @@
 package jb.vectorizer
 
+import jb.util.Const.{PREDICTION, SPARSE_PREDICTIONS}
 import org.apache.spark.ml.Transformer
 import org.apache.spark.ml.feature.VectorAssembler
-import jb.util.Const.SPARSE_PREDICTIONS
-import jb.util.Const.PREDICTION
 
 object PredictionVectorizers {
 
