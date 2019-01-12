@@ -39,7 +39,7 @@ class TreeParser(val weightAggregator: Array[Cube] => Double, rowWithin: (Array[
   def rect2dt(mins: Array[Double], maxes: Array[Double], elSize: Array[Double], dim: Int, maxDim: Int, rects: Array[Array[Cube]]): SimpleNode = {
     var diff = maxes(dim) - mins(dim)
     if (diff > elSize(dim) + EPSILON) {
-      val mid = mins(dim) + floor(diff / (2 * elSize(dim))) * elSize(dim)
+      val mid = mins(dim) + floor((diff + EPSILON) / (2 * elSize(dim))) * elSize(dim)
       val (newMins, newMaxes) = (mins.clone(), maxes.clone())
       newMins(dim) = mid
       newMaxes(dim) = mid
@@ -47,7 +47,7 @@ class TreeParser(val weightAggregator: Array[Cube] => Double, rowWithin: (Array[
     } else if (dim < maxDim - 1) {
       val newDim = dim + 1
       diff = maxes(newDim) - mins(newDim)
-      val mid = mins(newDim) + floor(diff / (2 * elSize(newDim))) * elSize(newDim)
+      val mid = mins(newDim) + floor((diff + EPSILON) / (2 * elSize(newDim))) * elSize(newDim)
       val (newMins, newMaxes) = (mins.clone(), maxes.clone())
       newMins(newDim) = mid
       newMaxes(newDim) = mid
