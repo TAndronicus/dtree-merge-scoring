@@ -41,18 +41,17 @@ class TreeParser(val weightAggregator: Array[Cube] => Double, rowWithin: (Array[
     if (diff > elSize(dim) + EPSILON) {
       val mid = mins(dim) + floor(diff / (2 * elSize(dim))) * elSize(dim)
       val (newMins, newMaxes) = (mins.clone(), maxes.clone())
-      newMins(dim) = diff
-      newMaxes(dim) = diff
-      InternalSimpleNode(rect2dt(mins, newMaxes, elSize, dim, maxDim, rects), rect2dt(newMins, maxes, elSize, dim, maxDim, rects),
-        new SimpleSplit(dim, diff))
-    } else if (dim < maxDim) {
+      newMins(dim) = mid
+      newMaxes(dim) = mid
+      InternalSimpleNode(rect2dt(mins, newMaxes, elSize, dim, maxDim, rects), rect2dt(newMins, maxes, elSize, dim, maxDim, rects), new SimpleSplit(dim, mid))
+    } else if (dim < maxDim - 1) {
       val newDim = dim + 1
       diff = maxes(newDim) - mins(newDim)
+      val mid = mins(newDim) + floor(diff / (2 * elSize(newDim))) * elSize(newDim)
       val (newMins, newMaxes) = (mins.clone(), maxes.clone())
-      newMins(dim) = diff
-      newMaxes(dim) = diff
-      InternalSimpleNode(rect2dt(mins, newMaxes, elSize, newDim, maxDim, rects), rect2dt(newMins, maxes, elSize, newDim, maxDim, rects),
-        new SimpleSplit(newDim, diff))
+      newMins(newDim) = mid
+      newMaxes(newDim) = mid
+      InternalSimpleNode(rect2dt(mins, newMaxes, elSize, newDim, maxDim, rects), rect2dt(newMins, maxes, elSize, newDim, maxDim, rects), new SimpleSplit(newDim, mid))
     } else {
       LeafSimpleNode(calculateLabel(mins, maxes, rects))
     }
