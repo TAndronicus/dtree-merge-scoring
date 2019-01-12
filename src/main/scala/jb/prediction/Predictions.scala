@@ -6,7 +6,7 @@ import org.apache.spark.sql.DataFrame
 
 object Predictions {
 
-  def testBaseClfs(baseModels: Array[DecisionTreeClassificationModel], testSubset: DataFrame): DataFrame = {
+  def predictBaseClfs(baseModels: Array[DecisionTreeClassificationModel], testSubset: DataFrame): DataFrame = {
     var dataset = testSubset
     for (i <- baseModels.indices) {
       dataset = baseModels(i).setPredictionCol(PREDICTION + "_" + i).transform(dataset).drop(COLUMNS2DROP: _*)

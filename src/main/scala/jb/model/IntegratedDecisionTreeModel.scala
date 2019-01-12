@@ -1,22 +1,29 @@
 package jb.model
 
-import org.apache.spark.ml.classification.{ClassificationModel, ProbabilisticClassificationModel}
-import org.apache.spark.ml.linalg.Vector
-import org.apache.spark.ml.param.ParamMap
+import jb.util.Const.{FEATURES, LABEL}
+import org.apache.spark.ml.linalg.DenseVector
+import org.apache.spark.sql.DataFrame
 
 class IntegratedDecisionTreeModel(val rootNode: SimpleNode) {
 
-//  override def predict(testData: Vector): Double = {
-//    traverseTree(rootNode, testData)
-//  }
-//
-//  def traverseTree(node: SimpleNode, testData: Vector): Double = {
-//    node match {
-//      case _: InternalSimpleNode =>
-//        val internalNode = node.asInstanceOf[InternalSimpleNode]
-//        traverseTree(if (internalNode.split.value > testData(internalNode.split.featureIndex)) internalNode.leftChild else internalNode.rightChild, testData)
-//      case _: LeafSimpleNode =>
-//        node.asInstanceOf[LeafSimpleNode].label
-//    }
-//  }
+  def transform(dataframe: DataFrame): Array[Double] = {
+    dataframe.select(FEATURES).collect().map(row => transform(row.toSeq.head.asInstanceOf[DenseVector].toArray))
+  }
+
+  def transform(obj: Array[Double]): Double = {
+    traverseTree(rootNode, obj)
+  }
+
+  def traverseTree(node: SimpleNode, obj: Array[Double]): Double = {
+    node match {
+      case nodeL: LeafSimpleNode =>
+        nodeL.label
+      case _ =>
+        val castedNode = node.asInstanceOf[InternalSimpleNode]
+        val split = castedNode.split
+        traverseTree(if (split.value > obj(split.featureIndex)) castedNode.leftChild else castedNode.rightChild, obj)
+    }
+  }
+
+
 }
