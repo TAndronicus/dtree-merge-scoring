@@ -1,4 +1,4 @@
-package jb
+package jb.tester
 
 import jb.util.Const.{LABEL, PREDICTION}
 import org.apache.spark.sql.DataFrame

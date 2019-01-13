@@ -4,7 +4,7 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 import java.util.stream.IntStream
 
-import jb.Tester.{testIAcc, testMvAcc}
+import jb.tester.Tester.{testIAcc, testMvAcc}
 import jb.io.FileReader.getRawInput
 import jb.model.{Cube, IntegratedDecisionTreeModel}
 import jb.parser.TreeParser
@@ -19,20 +19,14 @@ import jb.vectorizer.FeatureVectorizers.getFeatureVectorizer
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.DecisionTreeClassifier
 
-object Runner {
+class Runner (val nClassif: Int, val nFeatures: Int, val division: Int){
 
-  val nClassif = 5
-  val nFeatures = 2
-  val division = 10
+  def calculateMvIScores(filename: String): Array[Double] = {
 
-  def main(args: Array[String]): Unit = {
-
-    SparkEmbedded.setLogWarn()
     //    import SparkEmbedded.ss.implicits._
-
     val start = LocalTime.now
 
-    var input = getRawInput("A/pop_failures.csv", "csv")
+    var input = getRawInput(filename, "csv")
     val featureVectorizer = getFeatureVectorizer(input.columns)
     val featureSelector = FeatureSelectors.get_chi_sq_selector(nFeatures)
     val dataPrepPipeline = new Pipeline().setStages(Array(featureVectorizer, featureSelector))
@@ -65,6 +59,7 @@ object Runner {
     print("I: " + iQualityMeasure + "\n")
 
     //        while (true) {}
+    Array(mvQualityMeasure, iQualityMeasure)
   }
 
 }
