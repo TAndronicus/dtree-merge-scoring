@@ -7,7 +7,7 @@ object MultiRunner {
   def main(args: Array[String]): Unit = {
     SparkEmbedded.setLogWarn()
     val runner = new Runner(5, 2, Array(2, 6, 10, 14))
-    val scores = runner.calculateMvIScores("A/bi")
+    val scores = runner.calculateMvIScores("A/so")
     scores.foreach(i => print(i + "\n"))
   }
 
