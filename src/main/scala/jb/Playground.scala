@@ -10,7 +10,12 @@ object Playground {
     //    s1.unionAll(s2).except(s1.intersect(s2)).show()
     //    print("### Second ###")
     //    s1.except(s2).union(s2.except(s1)).show()
-    for (i <- 0.until(5)) print(i + "\n")
+    val a = Array(5, 4, 3, 2)
+    var c = Array(1, 2)
+    for (b <- a) {
+      c :+= b
+    }
+    c.foreach(i => print(i + "\n"))
   }
 
 }

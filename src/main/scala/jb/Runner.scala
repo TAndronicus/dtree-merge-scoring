@@ -4,13 +4,12 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 import java.util.stream.IntStream
 
-import jb.tester.Tester.{testIAcc, testMvAcc}
 import jb.io.FileReader.getRawInput
 import jb.model.{Cube, IntegratedDecisionTreeModel}
 import jb.parser.TreeParser
 import jb.prediction.Predictions.predictBaseClfs
 import jb.selector.FeatureSelectors
-import jb.server.SparkEmbedded
+import jb.tester.Tester.{testIAcc, testMvAcc}
 import jb.util.Const._
 import jb.util.Util._
 import jb.util.functions.WeightAggregators._
@@ -19,7 +18,7 @@ import jb.vectorizer.FeatureVectorizers.getFeatureVectorizer
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.DecisionTreeClassifier
 
-class Runner (val nClassif: Int, val nFeatures: Int, val division: Int){
+class Runner(val nClassif: Int, val nFeatures: Int, val divisions: Array[Int]) {
 
   def calculateMvIScores(filename: String): Array[Double] = {
 
@@ -34,9 +33,9 @@ class Runner (val nClassif: Int, val nFeatures: Int, val division: Int){
     input = optimizeInput(input, dataPrepModel)
 
     val (mins, maxes) = getExtrema(input, getSelectedFeatures(dataPrepModel))
-    val elSize = getElCubeSize(mins, maxes, division)
 
-    val subsets = input.randomSplit(IntStream.range(0, nClassif + 2).mapToDouble(_ => 1D / (nClassif + 2)).toArray)
+    val nSubsets = nClassif + 2
+    val subsets = input.randomSplit(IntStream.range(0, nSubsets).mapToDouble(_ => 1D / nSubsets).toArray)
     recacheInput2Subsets(input, subsets)
     val (trainingSubsets, cvSubset, testSubset) = dispenseSubsets(subsets)
 
@@ -45,21 +44,20 @@ class Runner (val nClassif: Int, val nFeatures: Int, val division: Int){
 
     var testedSubset = predictBaseClfs(baseModels, testSubset)
     val mvQualityMeasure = testMvAcc(testedSubset, nClassif)
+    var result = Array(mvQualityMeasure)
 
     val rootRect = Cube(mins, maxes)
     val treeParser = new TreeParser(sumOfVolumes, spansMid)
     val rects = baseModels.map(model => treeParser.dt2rect(rootRect, model.rootNode))
-    val tree = treeParser.rect2dt(mins, maxes, elSize, 0, 2, rects)
-    val integratedModel = new IntegratedDecisionTreeModel(tree)
-    val iPredictions = integratedModel.transform(testedSubset)
-    val iQualityMeasure = testIAcc(iPredictions, testedSubset)
+    for (division <- divisions) {
+      val elSize = getElCubeSize(mins, maxes, division)
+      val tree = treeParser.rect2dt(mins, maxes, elSize, 0, nFeatures, rects)
+      val integratedModel = new IntegratedDecisionTreeModel(tree)
+      val iPredictions = integratedModel.transform(testedSubset)
+      result :+= testIAcc(iPredictions, testedSubset)
+    }
 
-    print("\nTime: " + ChronoUnit.MILLIS.between(start, LocalTime.now) + "\n")
-    print("MV: " + mvQualityMeasure + "\n")
-    print("I: " + iQualityMeasure + "\n")
-
-    //        while (true) {}
-    Array(mvQualityMeasure, iQualityMeasure)
+    result
   }
 
 }
