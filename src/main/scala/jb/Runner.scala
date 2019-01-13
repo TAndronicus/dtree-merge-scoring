@@ -32,7 +32,7 @@ object Runner {
 
     val start = LocalTime.now
 
-    var input = getRawInput("A/data_banknote_authentication.csv", "csv")
+    var input = getRawInput("A/biodeg.csv", "csv")
     val featureVectorizer = getFeatureVectorizer(input.columns)
     val featureSelector = FeatureSelectors.get_chi_sq_selector(nFeatures)
     val dataPrepPipeline = new Pipeline().setStages(Array(featureVectorizer, featureSelector))
