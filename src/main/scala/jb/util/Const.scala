@@ -9,6 +9,7 @@ object Const {
   val COL_PREFIX = "_c"
   val COLUMNS2DROP = Array("rawPrediction", "probability")
   val SPARSE_PREDICTIONS = "sparse_predictions"
+  val FILENAME_PREFIX = "A/"
 
   val EPSILON = 1e-6
 
