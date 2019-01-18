@@ -1,7 +1,6 @@
 package jb
 
 import java.time.LocalTime
-import java.time.temporal.ChronoUnit
 import java.util.stream.IntStream
 
 import jb.io.FileReader.getRawInput
@@ -47,7 +46,7 @@ class Runner(val nClassif: Int, val nFeatures: Int, val divisions: Array[Int]) {
     var result = Array(mvQualityMeasure)
 
     val rootRect = Cube(mins, maxes)
-    val treeParser = new TreeParser(sumOfVolumes, spansMid)
+    val treeParser = new TreeParser(sumOfVolumesInv, spansMid)
     val rects = baseModels.map(model => treeParser.dt2rect(rootRect, model.rootNode))
     for (division <- divisions) {
       val elSize = getElCubeSize(mins, maxes, division)
