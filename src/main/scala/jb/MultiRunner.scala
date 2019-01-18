@@ -1,5 +1,7 @@
 package jb
 
+import java.io.{File, PrintWriter}
+
 import jb.server.SparkEmbedded
 import jb.util.Const.FILENAME_PREFIX
 
@@ -9,26 +11,38 @@ object MultiRunner {
     SparkEmbedded.setLogWarn()
     val reps = 10
     val filenames = Array("bi", "bu", "c", "d", "h", "i", "m", "p", "se", "so", "sp", "t", "wd", "wi")
-    val runner = new Runner(5, 2, Array(2, 6, 10, 14))
+    val nClassif = 5
+    val nFeatures = 2
+    val divisions = Array(15, 20, 25)
+
+    val runner = new Runner(nClassif, nFeatures, divisions)
     val finalScores = runForFiles(reps, runner)(filenames)
-    finalScores.map(_ / reps).foreach(i => print(i + "\n"))
+
+    writeScores(finalScores)
   }
 
   private def runForFiles(reps: Int, runner: Runner)(filenames: Array[String]) = {
-    val finalScores = Array(0D, 0D, 0D, 0D, 0D)
-    for (filename <- filenames) {
-      val scores = runReps(reps, runner, filename)
-      scores.indices.foreach(i => finalScores(i) += scores(i))
+    val finalScores = new Array[Array[Double]](filenames.length)
+    for (index <- filenames.indices) {
+      finalScores(index) = runReps(reps, runner, filenames(index))
     }
     finalScores
   }
 
   private def runReps(reps: Int, runner: Runner, filename: String) = {
-    val finalScores = Array(0D, 0D, 0D, 0D, 0D)
+    val meanScores = new Array[Double](runner.divisions.length + 1)
     for (_ <- 0.until(reps)) {
       val scores = runner.calculateMvIScores(FILENAME_PREFIX + filename)
-      scores.indices.foreach(i => finalScores(i) += scores(i))
+      scores.indices.foreach(i => meanScores(i) += scores(i))
     }
-    finalScores
+    meanScores.map(_ / reps)
   }
+
+  def writeScores(finalScores: Array[Array[Double]]): Unit = {
+    val pw = new PrintWriter(new File("result"))
+    finalScores.foreach(scores => pw.println(scores.map(_.toString).reduce((s1, s2) => s1 + "," + s2)))
+    pw.flush()
+    pw.close()
+  }
+
 }
