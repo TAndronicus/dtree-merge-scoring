@@ -1,6 +1,6 @@
 package jb.model
 
-case class Cube(var min: Array[Double], var max: Array[Double], var label: Double = 0D) {
+case class Rect(var min: Array[Double], var max: Array[Double], var label: Double = 0D) {
 
   def isWithin(rowsWithin: (Array[Double], Array[Double]) => Boolean): Boolean = {
     rowsWithin(min, max)

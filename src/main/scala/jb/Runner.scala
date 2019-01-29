@@ -4,7 +4,7 @@ import java.time.LocalTime
 import java.util.stream.IntStream
 
 import jb.io.FileReader.getRawInput
-import jb.model.{Cube, IntegratedDecisionTreeModel}
+import jb.model.{Rect, IntegratedDecisionTreeModel}
 import jb.parser.TreeParser
 import jb.prediction.Predictions.predictBaseClfs
 import jb.selector.FeatureSelectors
@@ -45,7 +45,7 @@ class Runner(val nClassif: Int, val nFeatures: Int, val divisions: Array[Int]) {
     val mvQualityMeasure = testMvAcc(testedSubset, nClassif)
     var result = Array(mvQualityMeasure)
 
-    val rootRect = Cube(mins, maxes)
+    val rootRect = Rect(mins, maxes)
     val treeParser = new TreeParser(sumOfVolumesInv, spansMid)
     val rects = baseModels.map(model => treeParser.dt2rect(rootRect, model.rootNode))
     for (division <- divisions) {

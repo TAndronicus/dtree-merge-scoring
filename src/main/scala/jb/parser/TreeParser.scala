@@ -6,9 +6,9 @@ import org.apache.spark.ml.tree.{ContinuousSplit, InternalNode, Node}
 
 import scala.math.floor
 
-class TreeParser(val weightAggregator: Array[Cube] => Double, rowWithin: (Array[Double], Array[Double]) => (Array[Double], Array[Double]) => Boolean) {
+class TreeParser(val weightAggregator: Array[Rect] => Double, rowWithin: (Array[Double], Array[Double]) => (Array[Double], Array[Double]) => Boolean) {
 
-  def dt2rect(parent: Cube, node: Node): Array[Cube] = {
+  def dt2rect(parent: Rect, node: Node): Array[Rect] = {
     node match {
       case _: InternalNode =>
         val interNode = node.asInstanceOf[InternalNode]
@@ -27,7 +27,7 @@ class TreeParser(val weightAggregator: Array[Cube] => Double, rowWithin: (Array[
     }
   }
 
-  def calculateLabel(mins: Array[Double], maxes: Array[Double], rects: Array[Array[Cube]]): Double = {
+  def calculateLabel(mins: Array[Double], maxes: Array[Double], rects: Array[Array[Rect]]): Double = {
     rects.map(
       geometricalRepresentation => geometricalRepresentation.filter(_.isWithin(rowWithin(mins, maxes))) // filtering ones that span the cube
         .groupBy(_.label)
@@ -36,7 +36,7 @@ class TreeParser(val weightAggregator: Array[Cube] => Double, rowWithin: (Array[
     ).groupBy(identity).reduce((l1, l2) => if (l1._2.length > l2._2.length) l1 else l2)._1 // chosing label with the greatest count
   }
 
-  def rect2dt(mins: Array[Double], maxes: Array[Double], elSize: Array[Double], dim: Int, maxDim: Int, rects: Array[Array[Cube]]): SimpleNode = {
+  def rect2dt(mins: Array[Double], maxes: Array[Double], elSize: Array[Double], dim: Int, maxDim: Int, rects: Array[Array[Rect]]): SimpleNode = {
     var diff = maxes(dim) - mins(dim)
     if (diff > elSize(dim) + EPSILON) {
       val mid = mins(dim) + floor((diff + EPSILON) / (2 * elSize(dim))) * elSize(dim)
@@ -55,6 +55,20 @@ class TreeParser(val weightAggregator: Array[Cube] => Double, rowWithin: (Array[
     } else {
       LeafSimpleNode(calculateLabel(mins, maxes, rects))
     }
+  }
+
+  def areAdjacent(tuple: (Rect, Rect)): Boolean = {
+    val (r1, r2) = tuple
+    for (dim <- r1.min.indices) {
+      if (r1.min(dim) == r2.max(dim) || r1.max(dim) == r2.min(dim)) return true
+    }
+    false
+  }
+
+  def rects2edges(rects: Array[Rect]): Array[Edge] = {
+    val indices = for (i <- rects.indices; j <- rects.indices if i != j) yield (i, j)
+    indices.map(tuple => (rects(tuple._1), rects(tuple._2))).filter(areAdjacent)
+    Array()
   }
 
 }

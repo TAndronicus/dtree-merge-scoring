@@ -11,9 +11,9 @@ object MultiRunner {
     SparkEmbedded.setLogWarn()
     val reps = 10
     val filenames = Array("bi", "bu", "c", "d", "h", "i", "m", "p", "se", "so", "sp", "t", "wd", "wi")
-    val nClassif = 5
+    val nClassif = 7
     val nFeatures = 2
-    val divisions = Array(15, 20, 25)
+    val divisions = Array(20, 40, 60)
 
     val runner = new Runner(nClassif, nFeatures, divisions)
     val finalScores = runForFiles(reps, runner)(filenames)
