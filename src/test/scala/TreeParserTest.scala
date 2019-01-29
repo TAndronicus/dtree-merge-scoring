@@ -99,4 +99,35 @@ class TreeParserTest extends FunSuite {
     assert(!areAdjacent)
   }
 
+  test("areOfSameLabel") {
+    // given
+    val r1 = Rect(Array(1, 2, 3), Array(2, 4, 6))
+    val r2 = Rect(Array(1, 2, 3), Array(2, 4, 6))
+    val r3 = Rect(Array(1, 2, 3), Array(2, 4, 6), 1D)
+
+    // when
+    val treeParser = new TreeParser(sumOfVolumes, spansMid)
+    val same12 = treeParser.areOfSameClasses((r1, r2))
+    val same13 = treeParser.areOfSameClasses((r1, r3))
+
+    // then
+    assert(same12)
+    assert(!same13)
+  }
+
+  test("createEdge") {
+    // given
+    val r1 = Rect(Array(0, 0), Array(5, 3))
+    val r2 = Rect(Array(5, 1), Array(6, 2))
+
+    // when
+    val treeParser = new TreeParser(sumOfVolumes, spansMid)
+    val edge = treeParser.createEdge((r1, r2))
+
+    // then
+    assert(edge.min(0) == edge.max(0))
+    assert(edge.min(1) == 1)
+    assert(edge.max(1) == 2)
+  }
+
 }
