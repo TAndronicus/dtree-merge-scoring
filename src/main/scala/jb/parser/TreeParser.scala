@@ -3,6 +3,7 @@ package jb.parser
 import jb.model._
 import jb.util.Const.EPSILON
 import org.apache.spark.ml.tree.{ContinuousSplit, InternalNode, Node}
+import scala.util.control.Breaks._
 
 class TreeParser(val weightAggregator: Array[Rect] => Double, rowWithin: (Array[Double], Array[Double]) => (Array[Double], Array[Double]) => Boolean) {
 
@@ -57,10 +58,10 @@ class TreeParser(val weightAggregator: Array[Rect] => Double, rowWithin: (Array[
 
   def areAdjacent(tuple: (Rect, Rect)): Boolean = {
     val (r1, r2) = tuple
-    for (dim <- r1.min.indices) {
-      if (r1.min(dim) == r2.max(dim) || r1.max(dim) == r2.min(dim)) return true
-    }
-    false
+      for (dim <- r1.min.indices) {
+        if (math.max(r1.min(dim), r2.min(dim)) > math.min(r1.max(dim), r2.max(dim))) return false
+      }
+    true
   }
 
   def areOfSameClasses(tuple: (Rect, Rect)): Boolean = {
@@ -79,8 +80,7 @@ class TreeParser(val weightAggregator: Array[Rect] => Double, rowWithin: (Array[
 
   def rects2edges(rects: Array[Rect]): Array[Edge] = {
     val indices = for (i <- rects.indices; j <- rects.indices if i != j) yield (i, j)
-    val edges = indices.map(tuple => (rects(tuple._1), rects(tuple._2))).filterNot(areOfSameClasses).filter(areAdjacent).map(createEdge)
-    Array()
+    indices.map(tuple => (rects(tuple._1), rects(tuple._2))).filterNot(areOfSameClasses).filter(areAdjacent).map(createEdge).toArray
   }
 
 }
