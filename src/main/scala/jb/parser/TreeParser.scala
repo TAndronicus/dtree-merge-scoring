@@ -79,7 +79,7 @@ class TreeParser(val weightAggregator: Array[Rect] => Double, rowWithin: (Array[
   }
 
   def rects2edges(rects: Array[Rect]): Array[Edge] = {
-    val indices = for (i <- rects.indices; j <- rects.indices if i != j) yield (i, j)
+    val indices = for (i <- rects.indices; j <- rects.indices if i < j) yield (i, j)
     indices.map(tuple => (rects(tuple._1), rects(tuple._2))).filterNot(areOfSameClasses).filter(areAdjacent).map(createEdge).toArray
   }
 

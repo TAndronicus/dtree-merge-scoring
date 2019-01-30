@@ -1,5 +1,6 @@
+package jb.parser
+
 import jb.model.{Edge, InternalSimpleNode, LeafSimpleNode, Rect}
-import jb.parser.TreeParser
 import jb.util.functions.WeightAggregators._
 import jb.util.functions.WithinDeterminers._
 import org.scalatest.FunSuite
@@ -70,8 +71,8 @@ class TreeParserTest extends FunSuite {
     val expectedEdges = Array(
       Edge(Array(0, 2), Array(3, 2)),
       Edge(Array(3, 2), Array(3, 3)),
-      Edge(Array(3, 1), Array(5, 3)),
-      Edge(Array(3, 0), Array(5, 1))
+      Edge(Array(3, 1), Array(5, 1)),
+      Edge(Array(3, 0), Array(3, 1))
     )
 
     // when
@@ -79,7 +80,7 @@ class TreeParserTest extends FunSuite {
     val edges = treeParser.rects2edges(rects)
 
     // then
-    assert(edges.containsSlice(expectedEdges))
+    expectedEdges.foreach(edge => assert(edges.contains(edge)))
   }
 
   test("areAdjacent positive") {
