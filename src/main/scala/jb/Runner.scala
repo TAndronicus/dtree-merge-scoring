@@ -41,20 +41,23 @@ class Runner(val nClassif: Int, val nFeatures: Int, val divisions: Array[Int]) {
     val dt = new DecisionTreeClassifier().setLabelCol(LABEL).setFeaturesCol(FEATURES)
     val baseModels = trainingSubsets.map(subset => dt.fit(subset))
 
-    var testedSubset = predictBaseClfs(baseModels, testSubset)
+    val testedSubset = predictBaseClfs(baseModels, testSubset)
     val mvQualityMeasure = testMvAcc(testedSubset, nClassif)
     var result = Array(mvQualityMeasure)
 
     val rootRect = Rect(mins, maxes)
     val treeParser = new TreeParser(sumOfVolumesInv, spansMid)
     val rects = baseModels.map(model => treeParser.dt2rect(rootRect, model.rootNode))
-    for (division <- divisions) {
-      val elSize = getElCubeSize(mins, maxes, division)
-      val tree = treeParser.rect2dt(mins, maxes, elSize, 0, nFeatures, rects)
-      val integratedModel = new IntegratedDecisionTreeModel(tree)
-      val iPredictions = integratedModel.transform(testedSubset)
-      result :+= testIAcc(iPredictions, testedSubset)
-    }
+    val edges = rects.map(treeParser.rects2edges)
+
+
+//    for (division <- divisions) {
+//      val elSize = getElCubeSize(mins, maxes, division)
+//      val tree = treeParser.rect2dt(mins, maxes, elSize, 0, nFeatures, rects)
+//      val integratedModel = new IntegratedDecisionTreeModel(tree)
+//      val iPredictions = integratedModel.transform(testedSubset)
+//      result :+= testIAcc(iPredictions, testedSubset)
+//    }
 
     result
   }

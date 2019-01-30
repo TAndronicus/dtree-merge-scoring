@@ -4,7 +4,7 @@ import jb.util.Const.FEATURES
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 import org.apache.spark.sql.DataFrame
 
-class IntegratedDecisionTreeModel(val rootNode: SimpleNode) {
+class IntegratedDecisionTreeModel(val edges: Array[Array[Edge]], val rects: Array[Array[Rect]]) {
 
   def transform(dataframe: DataFrame): Array[Double] = {
     dataframe.select(FEATURES).collect().map({ row =>
@@ -17,19 +17,35 @@ class IntegratedDecisionTreeModel(val rootNode: SimpleNode) {
     })
   }
 
-  def transform(obj: Array[Double]): Double = {
-    traverseTree(rootNode, obj)
+  def pointDist(p1: Array[Double], p2: Array[Double]): Double = {
+    math.sqrt(p1.indices.map(i => math.pow(p1(i) - p2(i), 2)).sum)
   }
 
-  def traverseTree(node: SimpleNode, obj: Array[Double]): Double = {
-    node match {
-      case nodeL: LeafSimpleNode =>
-        nodeL.label
-      case nodeI: InternalSimpleNode =>
-        val split = nodeI.split
-        traverseTree(if (split.value > obj(split.featureIndex)) nodeI.leftChild else nodeI.rightChild, obj)
+  def distUnsigned(edge: Edge, obj: Array[Double]): Double = {
+    if (edgeOvelaps(edge, obj, 0)) {
+      math.abs(edge.min(1) - obj(1))
+    } else if (edgeOvelaps(edge, obj, 1)) {
+      math.abs(edge.min(0) - obj(0))
+    } else {
+      math.min(pointDist(edge.min, obj), pointDist(edge.max, obj))
     }
   }
 
+  private def edgeOvelaps(edge: Edge, obj: Array[Double], dim: Int): Boolean = {
+    edge.min(dim) <= obj(dim) && edge.max(dim) >= obj(dim) && edge.min(dim) != edge.max(dim)
+  }
+
+  def minDistSigned(edgeModel: Array[Edge], obj: Array[Double]): Double = {
+    edgeModel.map(edge => distUnsigned(edge, obj)).min
+  }
+
+  def traverseForLabel(obj: Array[Double]): Double = {
+
+  }
+
+  def transform(obj: Array[Double]): Double = {
+    edges.indices.map(i => (traverseForLabel(obj), minDistSigned(edges(i), obj)))
+    0D
+  }
 
 }
