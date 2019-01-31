@@ -56,7 +56,7 @@ class TreeParser(val weightAggregator: Array[Rect] => Double, rowWithin: (Array[
     }
   }
 
-  protected def areAdjacent(tuple: (Rect, Rect)): Boolean = {
+  def areAdjacent(tuple: (Rect, Rect)): Boolean = {
     val (r1, r2) = tuple
       for (dim <- r1.min.indices) {
         if (math.max(r1.min(dim), r2.min(dim)) > math.min(r1.max(dim), r2.max(dim))) return false
@@ -64,11 +64,11 @@ class TreeParser(val weightAggregator: Array[Rect] => Double, rowWithin: (Array[
     true
   }
 
-  protected def areOfSameClasses(tuple: (Rect, Rect)): Boolean = {
+  def areOfSameClasses(tuple: (Rect, Rect)): Boolean = {
     tuple._1.label == tuple._2.label
   }
 
-  protected def createEdge(tuple: (Rect, Rect)): Edge = {
+  def createEdge(tuple: (Rect, Rect)): Edge = {
     val (r1, r2) = tuple
     val (mins, maxes) = (new Array[Double](r1.min.length), new Array[Double](r1.min.length))
     for (dim <- r1.min.indices) {

@@ -50,6 +50,7 @@ class Runner(val nClassif: Int, val nFeatures: Int, val divisions: Array[Int]) {
     val rects = baseModels.map(model => treeParser.dt2rect(rootRect, model.rootNode))
     val edges = rects.map(treeParser.rects2edges)
 
+    val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels)
 
 //    for (division <- divisions) {
 //      val elSize = getElCubeSize(mins, maxes, division)

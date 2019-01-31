@@ -1,10 +1,11 @@
 package jb.model
 
 import jb.util.Const.FEATURES
+import org.apache.spark.ml.classification.DecisionTreeClassificationModel
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 import org.apache.spark.sql.DataFrame
 
-class IntegratedDecisionTreeModel(val edges: Array[Array[Edge]], val rects: Array[Array[Rect]]) {
+class IntegratedDecisionTreeModel(val edges: Array[Array[Edge]], val baseModels: Array[DecisionTreeClassificationModel]) {
 
   def transform(dataframe: DataFrame): Array[Double] = {
     dataframe.select(FEATURES).collect().map({ row =>
@@ -35,16 +36,12 @@ class IntegratedDecisionTreeModel(val edges: Array[Array[Edge]], val rects: Arra
     edge.min(dim) <= obj(dim) && edge.max(dim) >= obj(dim) && edge.min(dim) != edge.max(dim)
   }
 
-  def minDistSigned(edgeModel: Array[Edge], obj: Array[Double]): Double = {
+  def minDistUnsigned(edgeModel: Array[Edge], obj: Array[Double]): Double = {
     edgeModel.map(edge => distUnsigned(edge, obj)).min
   }
 
-  def traverseForLabel(obj: Array[Double]): Double = {
-
-  }
-
   def transform(obj: Array[Double]): Double = {
-    edges.indices.map(i => (traverseForLabel(obj), minDistSigned(edges(i), obj)))
+    val res = edges.indices.map(i => (baseModels(i).predict(new DenseVector(obj)), minDistUnsigned(edges(i), obj))).groupBy(_._1)
     0D
   }
 
