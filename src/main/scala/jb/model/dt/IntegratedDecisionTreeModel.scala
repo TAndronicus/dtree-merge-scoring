@@ -6,7 +6,7 @@ import org.apache.spark.ml.classification.DecisionTreeClassificationModel
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 import org.apache.spark.sql.DataFrame
 
-class IntegratedDecisionTreeModel(val edges: Array[Array[Edge]], val baseModels: Array[DecisionTreeClassificationModel]) {
+class IntegratedDecisionTreeModel(val edges: Array[Array[Edge]], val baseModels: Array[DecisionTreeClassificationModel], val distMappingFunction: Double => Double) {
 
   def transform(dataframe: DataFrame): Array[Double] = {
     dataframe.select(FEATURES).collect().map({ row =>
@@ -44,8 +44,12 @@ class IntegratedDecisionTreeModel(val edges: Array[Array[Edge]], val baseModels:
     edgeModel.map(edge => distUnsigned(edge, obj)).min
   }
 
+  def weightedDist(edgeModel: Array[Edge], obj: Array[Double]): Double = {
+    distMappingFunction(minDistUnsigned(edgeModel, obj))
+  }
+
   def transform(obj: Array[Double]): Double = {
-    edges.indices.map(i => (baseModels(i).predict(new DenseVector(obj)), minDistUnsigned(edges(i), obj))).groupBy(_._1).mapValues(_.map(_._2).sum).reduce((l1, l2) => if (l1._2 > l2._2) l1 else l2)._1
+    edges.indices.map(i => (baseModels(i).predict(new DenseVector(obj)), weightedDist(edges(i), obj))).groupBy(_._1).mapValues(_.map(_._2).sum).reduce((l1, l2) => if (l1._2 > l2._2) l1 else l2)._1
   }
 
 }

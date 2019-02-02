@@ -47,11 +47,11 @@ class Runner(val nClassif: Int, val nFeatures: Int) {
     var result = Array(mvQualityMeasure)
 
     val rootRect = Rect(mins, maxes)
-    val treeParser = new TreeParser(sumOfVolumesInv, spansMid)
+    val treeParser = new TreeParser()
     val rects = baseModels.map(model => treeParser.dt2rect(rootRect, model.rootNode))
     val edges = rects.map(treeParser.rects2edges)
 
-    val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels)
+    val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels, i => i) // TODO: Add mapping fn
     val iPredictions = integratedModel.transform(testedSubset)
     result :+= testIAcc(iPredictions, testedSubset)
 
