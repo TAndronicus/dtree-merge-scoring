@@ -1,5 +1,6 @@
-package jb.model
+package jb.model.dt
 
+import jb.model.Edge
 import jb.util.Const.FEATURES
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}

@@ -1,5 +1,6 @@
-package jb.model
+package jb.model.dt
 
+import jb.model.Edge
 import org.scalatest.FunSuite
 
 class IntegratedDecisionTreeModelTest extends FunSuite {
