@@ -9,9 +9,9 @@ object MultiRunner {
 
   def main(args: Array[String]): Unit = {
     SparkEmbedded.setLogWarn()
-    val reps = 10
+    val reps = 1
     val filenames = Array("bi", "bu", "c", "d", "h", "i", "m", "p", "se", "so", "sp", "t", "wd", "wi")
-    val nClassif = 7
+    val nClassif = 3
     val nFeatures = 2
     val divisions = Array(20, 40, 60)
 

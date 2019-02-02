@@ -7,6 +7,7 @@ object Playground {
     val b = Array(6, 14)
     val res = math.sqrt(a.indices.map(i => math.pow(a(i) - b(i), 2)).sum)
     println(res)
+
   }
 
 }

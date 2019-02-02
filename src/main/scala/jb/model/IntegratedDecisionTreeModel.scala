@@ -37,12 +37,14 @@ class IntegratedDecisionTreeModel(val edges: Array[Array[Edge]], val baseModels:
   }
 
   def minDistUnsigned(edgeModel: Array[Edge], obj: Array[Double]): Double = {
+    if (edgeModel.isEmpty) {
+      return .5  // Data is normalized
+    }
     edgeModel.map(edge => distUnsigned(edge, obj)).min
   }
 
   def transform(obj: Array[Double]): Double = {
-    val res = edges.indices.map(i => (baseModels(i).predict(new DenseVector(obj)), minDistUnsigned(edges(i), obj))).groupBy(_._1)
-    0D
+    edges.indices.map(i => (baseModels(i).predict(new DenseVector(obj)), minDistUnsigned(edges(i), obj))).groupBy(_._1).mapValues(_.map(_._2).sum).reduce((l1, l2) => if (l1._2 > l2._2) l1 else l2)._1
   }
 
 }

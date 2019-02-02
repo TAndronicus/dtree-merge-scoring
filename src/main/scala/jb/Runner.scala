@@ -51,14 +51,8 @@ class Runner(val nClassif: Int, val nFeatures: Int, val divisions: Array[Int]) {
     val edges = rects.map(treeParser.rects2edges)
 
     val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels)
-
-//    for (division <- divisions) {
-//      val elSize = getElCubeSize(mins, maxes, division)
-//      val tree = treeParser.rect2dt(mins, maxes, elSize, 0, nFeatures, rects)
-//      val integratedModel = new IntegratedDecisionTreeModel(tree)
-//      val iPredictions = integratedModel.transform(testedSubset)
-//      result :+= testIAcc(iPredictions, testedSubset)
-//    }
+    val iPredictions = integratedModel.transform(testedSubset)
+    result :+= testIAcc(iPredictions, testedSubset)
 
     result
   }
