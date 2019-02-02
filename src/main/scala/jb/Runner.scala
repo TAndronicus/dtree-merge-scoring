@@ -4,7 +4,8 @@ import java.time.LocalTime
 import java.util.stream.IntStream
 
 import jb.io.FileReader.getRawInput
-import jb.model.{Rect, IntegratedDecisionTreeModel}
+import jb.model.dt.IntegratedDecisionTreeModel
+import jb.model.Rect
 import jb.parser.TreeParser
 import jb.prediction.Predictions.predictBaseClfs
 import jb.selector.FeatureSelectors
@@ -17,7 +18,7 @@ import jb.vectorizer.FeatureVectorizers.getFeatureVectorizer
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.DecisionTreeClassifier
 
-class Runner(val nClassif: Int, val nFeatures: Int, val divisions: Array[Int]) {
+class Runner(val nClassif: Int, val nFeatures: Int) {
 
   def calculateMvIScores(filename: String): Array[Double] = {
 

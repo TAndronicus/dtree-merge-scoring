@@ -13,9 +13,8 @@ object MultiRunner {
     val filenames = Array("bi", "bu", "c", "d", "h", "i", "m", "p", "se", "so", "sp", "t", "wd", "wi")
     val nClassif = 3
     val nFeatures = 2
-    val divisions = Array(20, 40, 60)
 
-    val runner = new Runner(nClassif, nFeatures, divisions)
+    val runner = new Runner(nClassif, nFeatures)
     val finalScores = runForFiles(reps, runner)(filenames)
 
     writeScores(finalScores)
@@ -30,7 +29,7 @@ object MultiRunner {
   }
 
   private def runReps(reps: Int, runner: Runner, filename: String) = {
-    val meanScores = new Array[Double](runner.divisions.length + 1)
+    val meanScores = new Array[Double](2)
     for (_ <- 0.until(reps)) {
       val scores = runner.calculateMvIScores(FILENAME_PREFIX + filename)
       scores.indices.foreach(i => meanScores(i) += scores(i))
