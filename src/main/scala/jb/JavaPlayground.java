@@ -1,7 +1,5 @@
 package jb;
 
-import java.util.Arrays;
-
 public class JavaPlayground {
 
     public static void main(String[] args) {

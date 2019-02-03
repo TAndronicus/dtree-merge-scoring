@@ -8,15 +8,6 @@ import org.apache.spark.sql.functions.col
 
 object Util {
 
-  def parseDouble(value: Any): Double = {
-    value match {
-      case int: Int =>
-        int.toDouble
-      case double: Double =>
-        double
-    }
-  }
-
   def getExtrema(input: DataFrame, selectedFeatures: Array[Int]): (Array[Double], Array[Double]) = {
     var paramMap = List.newBuilder[(String, String)]
     for (item <- selectedFeatures.sorted; fun <- Array("min", "max")) {
@@ -26,6 +17,15 @@ object Util {
     val mins = extrema.sliding(1, 2).flatten.map(value => parseDouble(value)).toArray
     val maxs = extrema.drop(1).sliding(1, 2).flatten.map(value => parseDouble(value)).toArray
     (mins, maxs)
+  }
+
+  def parseDouble(value: Any): Double = {
+    value match {
+      case int: Int =>
+        int.toDouble
+      case double: Double =>
+        double
+    }
   }
 
   def optimizeInput(input: DataFrame, dataPrepModel: PipelineModel): DataFrame = {

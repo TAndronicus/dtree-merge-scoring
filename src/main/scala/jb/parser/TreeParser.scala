@@ -24,6 +24,11 @@ class TreeParser() {
     }
   }
 
+  def rects2edges(rects: Array[Rect]): Array[Edge] = {
+    val indices = for (i <- rects.indices; j <- rects.indices if i < j) yield (i, j)
+    indices.map(tuple => (rects(tuple._1), rects(tuple._2))).filterNot(areOfSameClasses).filter(areAdjacent).map(createEdge).toArray
+  }
+
   def areAdjacent(tuple: (Rect, Rect)): Boolean = {
     val (r1, r2) = tuple
     for (dim <- r1.min.indices) {
@@ -44,11 +49,6 @@ class TreeParser() {
       maxes(dim) = math.min(r1.max(dim), r2.max(dim))
     }
     Edge(mins, maxes)
-  }
-
-  def rects2edges(rects: Array[Rect]): Array[Edge] = {
-    val indices = for (i <- rects.indices; j <- rects.indices if i < j) yield (i, j)
-    indices.map(tuple => (rects(tuple._1), rects(tuple._2))).filterNot(areOfSameClasses).filter(areAdjacent).map(createEdge).toArray
   }
 
 }

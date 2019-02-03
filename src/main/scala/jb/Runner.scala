@@ -4,16 +4,15 @@ import java.time.LocalTime
 import java.util.stream.IntStream
 
 import jb.io.FileReader.getRawInput
-import jb.model.dt.IntegratedDecisionTreeModel
 import jb.model.Rect
+import jb.model.dt.IntegratedDecisionTreeModel
 import jb.parser.TreeParser
 import jb.prediction.Predictions.predictBaseClfs
 import jb.selector.FeatureSelectors
 import jb.tester.Tester.{testIAcc, testMvAcc}
 import jb.util.Const._
 import jb.util.Util._
-import jb.util.functions.WeightAggregators._
-import jb.util.functions.WithinDeterminers._
+import jb.util.functions.DistMappingFunctions.simpleMapping
 import jb.vectorizer.FeatureVectorizers.getFeatureVectorizer
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.DecisionTreeClassifier
@@ -51,7 +50,7 @@ class Runner(val nClassif: Int, val nFeatures: Int) {
     val rects = baseModels.map(model => treeParser.dt2rect(rootRect, model.rootNode))
     val edges = rects.map(treeParser.rects2edges)
 
-    val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels, i => i) // TODO: Add mapping fn
+    val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels, simpleMapping)
     val iPredictions = integratedModel.transform(testedSubset)
     result :+= testIAcc(iPredictions, testedSubset)
 

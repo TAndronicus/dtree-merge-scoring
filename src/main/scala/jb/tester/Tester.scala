@@ -14,17 +14,17 @@ object Tester {
     matched.count(i => i).toDouble / matched.length
   }
 
-  def testIAcc(predictions: Array[Double], testSubset: DataFrame): Double = {
-    val refLabels = getReferenceLabels(testSubset)
-    val matches = refLabels.indices.map(i => predictions(i) == refLabels(i))
-    matches.count(i => i).toDouble / matches.length
-  }
-
   private def getReferenceLabels(testedSubset: DataFrame): Array[Double] = {
     testedSubset.select(LABEL).collect().map(_.get(0)).map {
       case int: Int => int.toDouble
       case double: Double => double
     }
+  }
+
+  def testIAcc(predictions: Array[Double], testSubset: DataFrame): Double = {
+    val refLabels = getReferenceLabels(testSubset)
+    val matches = refLabels.indices.map(i => predictions(i) == refLabels(i))
+    matches.count(i => i).toDouble / matches.length
   }
 
 }
