@@ -18,11 +18,13 @@ object MultiRunner {
     val finalScores = runForFiles(reps, runner)(filenames)
 
     writeScores(finalScores)
+    println(finalScores.map(sc => if (sc.last > sc.head) 1 else 0).sum.toDouble / finalScores.length)
   }
 
   private def runForFiles(reps: Int, runner: Runner)(filenames: Array[String]) = {
     val finalScores = new Array[Array[Double]](filenames.length)
     for (index <- filenames.indices) {
+      println(s"File: ${filenames(index)}")
       finalScores(index) = runReps(reps, runner, filenames(index))
     }
     finalScores
