@@ -5,14 +5,14 @@ import java.util.stream.IntStream
 
 import jb.io.FileReader.getRawInput
 import jb.model.Rect
-import jb.model.dt.IntegratedDecisionTreeModel
+import jb.model.dt.PreMappingIntegratedDecisionTreeModel
 import jb.parser.TreeParser
 import jb.prediction.Predictions.predictBaseClfs
 import jb.selector.FeatureSelectors
 import jb.tester.Tester.{testIAcc, testMvAcc}
 import jb.util.Const._
 import jb.util.Util._
-import jb.util.functions.DistMappingFunctions.simpleMapping
+import jb.util.functions.DistMappingFunctions.momentMappingFunction
 import jb.vectorizer.FeatureVectorizers.getFeatureVectorizer
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.DecisionTreeClassifier
@@ -25,7 +25,9 @@ class Runner(val nClassif: Int, var nFeatures: Int) {
     val start = LocalTime.now
 
     var input = getRawInput(filename, "csv")
-    if (nFeatures > input.columns.length - 1) {this.nFeatures = input.columns.length - 1; println(s"Setting nFeatures to $nFeatures")}
+    if (nFeatures > input.columns.length - 1) {
+      this.nFeatures = input.columns.length - 1; println(s"Setting nFeatures to $nFeatures")
+    }
     val featureVectorizer = getFeatureVectorizer(input.columns)
     val featureSelector = FeatureSelectors.get_chi_sq_selector(nFeatures)
     val dataPrepPipeline = new Pipeline().setStages(Array(featureVectorizer, featureSelector))
@@ -51,7 +53,9 @@ class Runner(val nClassif: Int, var nFeatures: Int) {
     val rects = baseModels.map(model => treeParser.dt2rect(rootRect, model.rootNode))
     val edges = rects.map(treeParser.rects2edges)
 
-    val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels, simpleMapping)
+    //    val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels, simpleMapping)
+    val preMappingMoments = calculateMoments(input, getSelectedFeatures(dataPrepModel))
+    val integratedModel = new PreMappingIntegratedDecisionTreeModel(edges, baseModels, preMappingMoments, momentMappingFunction)
     val iPredictions = integratedModel.transform(testedSubset)
     result :+= testIAcc(iPredictions, testedSubset)
 
