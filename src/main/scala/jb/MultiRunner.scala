@@ -19,7 +19,7 @@ object MultiRunner {
     val finalScores = runForFiles(reps, runner)(filenames)
 
     writeScores(finalScores)
-    println(finalScores.map(sc => if (sc.last > sc.head) 1 else 0).sum.toDouble / finalScores.length)
+    println("Better : Same : Worse ::: " + finalScores.map(sc => if (sc.last > sc.head) 1 else 0).sum + " : " + finalScores.map(sc => if (sc.last == sc.head) 1 else 0).sum + " : " + finalScores.map(sc => if (sc.last < sc.head) 1 else 0).sum)
   }
 
   private def runForFiles(reps: Int, runner: Runner)(filenames: Array[String]) = {
