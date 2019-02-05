@@ -12,12 +12,12 @@ import jb.selector.FeatureSelectors
 import jb.tester.Tester.{testIAcc, testMvAcc}
 import jb.util.Const._
 import jb.util.Util._
-import jb.util.functions.DistMappingFunctions.momentMappingFunction
+import jb.util.functions.DistMappingFunctions._
 import jb.vectorizer.FeatureVectorizers.getFeatureVectorizer
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.DecisionTreeClassifier
 
-class Runner(val nClassif: Int, var nFeatures: Int) {
+class Runner(val nClassif: Int, var nFeatures: Int, val alpha: Double) {
 
   def calculateMvIScores(filename: String): Array[Double] = {
 
@@ -55,7 +55,7 @@ class Runner(val nClassif: Int, var nFeatures: Int) {
 
     //    val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels, simpleMapping)
     val preMappingMoments = calculateMoments(input, getSelectedFeatures(dataPrepModel))
-    val integratedModel = new PreMappingIntegratedDecisionTreeModel(edges, baseModels, preMappingMoments, momentMappingFunction)
+    val integratedModel = new PreMappingIntegratedDecisionTreeModel(edges, baseModels, preMappingMoments, parametrizedMomentMappingFunction(alpha))
     val iPredictions = integratedModel.transform(testedSubset)
     result :+= testIAcc(iPredictions, testedSubset)
 

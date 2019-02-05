@@ -13,8 +13,9 @@ object MultiRunner {
     val filenames = Array("bi", "bu", "c", "d", "h", "i", "m", "p", "se", "so", "sp", "t", "wd", "wi")
     val nClassif = 3
     val nFeatures = 2
+    val alpha = 0
 
-    val runner = new Runner(nClassif, nFeatures)
+    val runner = new Runner(nClassif, nFeatures, alpha)
     val finalScores = runForFiles(reps, runner)(filenames)
 
     writeScores(finalScores)
