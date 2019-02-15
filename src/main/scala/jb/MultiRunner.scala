@@ -10,7 +10,7 @@ object MultiRunner {
   def main(args: Array[String]): Unit = {
     SparkEmbedded.setLogWarn()
     val reps = 1
-    val filenames = Array("bi", "bu", "c", "d", "h", "i", "m", "p", "se", "so", "sp", "t", "wd", "wi")
+    val filenames = Array("bi", "bu", "c", "d", "h", "i", "m", "p", "se", "t", "wd", "wi")
     val nClassif = 3
     val nFeatures = 2
     val alpha = 0

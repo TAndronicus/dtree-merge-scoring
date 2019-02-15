@@ -1,10 +1,13 @@
 package jb.util
 
+import jb.server.SparkEmbedded
 import jb.util.Const._
 import org.apache.spark.ml.PipelineModel
+import org.apache.spark.ml.classification.DecisionTreeClassificationModel
 import org.apache.spark.ml.feature.ChiSqSelectorModel
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.{DoubleType, LongType, StructField, StructType}
 
 import scala.collection.mutable
 
@@ -58,12 +61,33 @@ object Util {
     mins.indices.map(i => (maxes(i) - mins(i)) / division).toArray
   }
 
-  def calculateMoments(input: DataFrame, selectedFeatures: Array[Int]): Map[Double, Array[Double]] = {
+  def calculateMomentsByLabels(input: DataFrame, selectedFeatures: Array[Int]): Map[Double, Array[Double]] = {
     val selFNames = selectedFeatures.map(item => COL_PREFIX + item)
-    val intermediate = input.select(selFNames.map(col).+:(col(LABEL)):_*).groupBy(col(LABEL)).avg(selFNames:_*)
+    val intermediate = input.select(selFNames.map(col).+:(col(LABEL)): _*).groupBy(col(LABEL)).avg(selFNames: _*)
     val moments = mutable.Map[Double, Array[Double]]()
     for (row <- intermediate.collect()) {
       moments.put(parseDouble(row.get(0)), row.toSeq.takeRight(row.length - 1).toArray.map(parseDouble))
+    }
+    moments.toMap
+  }
+
+  def calculateMomentsByPrediction(input: DataFrame, selectedFeatures: Array[Int], baseModels: Array[DecisionTreeClassificationModel]): Map[Double, Array[Double]] = {
+    var dataset = input.select(col("*"))
+    val selFNames = selectedFeatures.map(item => COL_PREFIX + item)
+    val schema = StructType(Seq(
+      StructField(PREDICTION, DoubleType, nullable = false),
+      StructField(PREDICTION + COUNT_SUFFIX, LongType, nullable = false)
+    ) ++ selFNames.map(_ + AVERAGE_SUFFIX).map(item => StructField(item, DoubleType, nullable = true)))
+    var aggregate = SparkEmbedded.ss.createDataFrame(SparkEmbedded.ss.sparkContext.emptyRDD[Row], schema)
+
+    for (index <- baseModels.indices) {
+      dataset = baseModels(index).setPredictionCol(PREDICTION + "_" + index).transform(dataset).drop(COLUMNS2DROP: _*)
+      aggregate = aggregate.union(dataset.withColumnRenamed(PREDICTION + "_" + index, PREDICTION).groupBy(PREDICTION).agg(count(PREDICTION), selFNames.map(avg): _*))
+    }
+    val weightedMean = aggregate.groupBy(PREDICTION).agg(sum(PREDICTION + COUNT_SUFFIX), selFNames.map(_ + AVERAGE_SUFFIX).map(col).map(_ * col(PREDICTION + COUNT_SUFFIX)).map(sum): _*)
+    val moments = mutable.Map[Double, Array[Double]]()
+    for (row <- weightedMean.collect()) {
+      moments.put(parseDouble(row.getDouble(0)), row.toSeq.takeRight(row.length - 2).toArray.map(parseDouble).map(_ / row.getLong(1)))
     }
     moments.toMap
   }

@@ -5,7 +5,7 @@ import java.util.stream.IntStream
 
 import jb.io.FileReader.getRawInput
 import jb.model.Rect
-import jb.model.dt.PreMappingIntegratedDecisionTreeModel
+import jb.model.dt.MappedIntegratedDecisionTreeModel
 import jb.parser.TreeParser
 import jb.prediction.Predictions.predictBaseClfs
 import jb.selector.FeatureSelectors
@@ -54,8 +54,9 @@ class Runner(val nClassif: Int, var nFeatures: Int, val alpha: Double) {
     val edges = rects.map(treeParser.rects2edges)
 
     //    val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels, simpleMapping)
-    val preMappingMoments = calculateMoments(input, getSelectedFeatures(dataPrepModel))
-    val integratedModel = new PreMappingIntegratedDecisionTreeModel(edges, baseModels, preMappingMoments, parametrizedMomentMappingFunction(alpha))
+    val preMappingMoments = calculateMomentsByLabels(input, getSelectedFeatures(dataPrepModel))
+    val postMappingValidationMoments = calculateMomentsByPrediction(cvSubset, getSelectedFeatures(dataPrepModel), baseModels)
+    val integratedModel = new MappedIntegratedDecisionTreeModel(edges, baseModels, postMappingValidationMoments, parametrizedMomentMappingFunction(alpha))
     val iPredictions = integratedModel.transform(testedSubset)
     result :+= testIAcc(iPredictions, testedSubset)
 

@@ -6,7 +6,7 @@ import org.apache.spark.ml.classification.DecisionTreeClassificationModel
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 import org.apache.spark.sql.DataFrame
 
-class PreMappingIntegratedDecisionTreeModel(val edges: Array[Array[Edge]], val baseModels: Array[DecisionTreeClassificationModel], val moments: Map[Double, Array[Double]], val distMappingFunction: (Double, Double) => Double) {
+class MappedIntegratedDecisionTreeModel(val edges: Array[Array[Edge]], val baseModels: Array[DecisionTreeClassificationModel], val moments: Map[Double, Array[Double]], val distMappingFunction: (Double, Double) => Double) {
 
   def transform(dataframe: DataFrame): Array[Double] = {
     dataframe.select(FEATURES).collect().map({ row =>
