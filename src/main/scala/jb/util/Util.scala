@@ -5,7 +5,7 @@ import jb.util.Const._
 import org.apache.spark.ml.PipelineModel
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel
 import org.apache.spark.ml.feature.ChiSqSelectorModel
-import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{DoubleType, LongType, StructField, StructType}
 
@@ -48,6 +48,10 @@ object Util {
   def recacheInput2Subsets(input: DataFrame, subsets: Array[DataFrame]): Unit = {
     input.unpersist
     subsets.foreach(_.cache)
+  }
+
+  def clearCache(subsets: Array[Dataset[Row]]) = {
+    subsets.foreach(_.unpersist)
   }
 
   def dispenseSubsets(subsets: Array[DataFrame]): (Array[DataFrame], DataFrame, DataFrame) = {

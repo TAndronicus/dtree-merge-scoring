@@ -1,6 +1,5 @@
 package jb
 
-import java.time.LocalTime
 import java.util.stream.IntStream
 
 import jb.io.FileReader.getRawInput
@@ -9,6 +8,7 @@ import jb.model.dt.MappedIntegratedDecisionTreeModel
 import jb.parser.TreeParser
 import jb.prediction.Predictions.predictBaseClfs
 import jb.selector.FeatureSelectors
+import jb.server.SparkEmbedded
 import jb.tester.Tester.{testIAcc, testMvAcc}
 import jb.util.Const._
 import jb.util.Util._
@@ -22,11 +22,12 @@ class Runner(val nClassif: Int, var nFeatures: Int, val alpha: Double) {
   def calculateMvIScores(filename: String): Array[Double] = {
 
     //    import SparkEmbedded.ss.implicits._
-    val start = LocalTime.now
+    SparkEmbedded.ss.sqlContext.clearCache()
 
     var input = getRawInput(filename, "csv")
     if (nFeatures > input.columns.length - 1) {
-      this.nFeatures = input.columns.length - 1; println(s"Setting nFeatures to $nFeatures")
+      this.nFeatures = input.columns.length - 1;
+      println(s"Setting nFeatures to $nFeatures")
     }
     val featureVectorizer = getFeatureVectorizer(input.columns)
     val featureSelector = FeatureSelectors.get_chi_sq_selector(nFeatures)
@@ -59,6 +60,8 @@ class Runner(val nClassif: Int, var nFeatures: Int, val alpha: Double) {
     val integratedModel = new MappedIntegratedDecisionTreeModel(edges, baseModels, postMappingValidationMoments, parametrizedMomentMappingFunction(alpha))
     val iPredictions = integratedModel.transform(testedSubset)
     result :+= testIAcc(iPredictions, testedSubset)
+
+    clearCache(subsets)
 
     result
   }
