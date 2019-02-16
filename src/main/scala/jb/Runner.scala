@@ -57,7 +57,7 @@ class Runner(val nClassif: Int, var nFeatures: Int, val alpha: Double) {
     //    val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels, simpleMapping)
     val preMappingMoments = calculateMomentsByLabels(input, getSelectedFeatures(dataPrepModel))
     val postMappingValidationMoments = calculateMomentsByPrediction(cvSubset, getSelectedFeatures(dataPrepModel), baseModels)
-    val integratedModel = new MappedIntegratedDecisionTreeModel(edges, baseModels, postMappingValidationMoments, parametrizedMomentMappingFunction(alpha))
+    val integratedModel = new MappedIntegratedDecisionTreeModel(edges, baseModels, preMappingMoments, parametrizedMomentMappingFunction(alpha))
     val iPredictions = integratedModel.transform(testedSubset)
     result :+= testIAcc(iPredictions, testedSubset)
 
