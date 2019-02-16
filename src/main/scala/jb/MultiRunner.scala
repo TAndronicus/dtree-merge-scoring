@@ -1,8 +1,5 @@
 package jb
 
-import java.io.{File, PrintWriter}
-
-import jb.server.SparkEmbedded
 import jb.util.Const.FILENAME_PREFIX
 import jb.util.result.{LeastBatchExhaustiveResultCatcher, ResultCatcher}
 

@@ -4,7 +4,7 @@ import java.util.stream.IntStream
 
 import jb.io.FileReader.getRawInput
 import jb.model.Rect
-import jb.model.dt.MappedIntegratedDecisionTreeModel
+import jb.model.dt.{IntegratedDecisionTreeModel, MappedIntegratedDecisionTreeModel}
 import jb.parser.TreeParser
 import jb.prediction.Predictions.predictBaseClfs
 import jb.selector.FeatureSelectors
@@ -26,7 +26,7 @@ class Runner(val nClassif: Int, var nFeatures: Int, val alpha: Double) {
 
     var input = getRawInput(filename, "csv")
     if (nFeatures > input.columns.length - 1) {
-      this.nFeatures = input.columns.length - 1;
+      this.nFeatures = input.columns.length - 1
       println(s"Setting nFeatures to $nFeatures")
     }
     val featureVectorizer = getFeatureVectorizer(input.columns)
@@ -54,10 +54,12 @@ class Runner(val nClassif: Int, var nFeatures: Int, val alpha: Double) {
     val rects = baseModels.map(model => treeParser.dt2rect(rootRect, model.rootNode))
     val edges = rects.map(treeParser.rects2edges)
 
-    //    val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels, simpleMapping)
-    val preMappingMoments = calculateMomentsByLabels(input, getSelectedFeatures(dataPrepModel))
-    val postMappingValidationMoments = calculateMomentsByPrediction(cvSubset, getSelectedFeatures(dataPrepModel), baseModels)
-    val integratedModel = new MappedIntegratedDecisionTreeModel(edges, baseModels, preMappingMoments, parametrizedMomentMappingFunction(alpha))
+//        val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels, simpleMapping)
+//    val preMappingMoments = calculateMomentsByLabels(input, getSelectedFeatures(dataPrepModel))
+//    val postMappingValidationMoments = calculateMomentsByPredictionCollectively(cvSubset, getSelectedFeatures(dataPrepModel), baseModels)
+    val postMappingValidationMoments = calculateMomentsByPredictionRespectively(trainingSubsets, getSelectedFeatures(dataPrepModel), baseModels)
+    postMappingValidationMoments.mapValues(_.map(_.toString).reduce((d1, d2) => d1 + "_" + d2)).foreach(println)
+    val integratedModel = new MappedIntegratedDecisionTreeModel(edges, baseModels, postMappingValidationMoments, parametrizedMomentMappingFunction(alpha))
     val iPredictions = integratedModel.transform(testedSubset)
     result :+= testIAcc(iPredictions, testedSubset)
 

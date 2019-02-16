@@ -75,7 +75,7 @@ object Util {
     moments.toMap
   }
 
-  def calculateMomentsByPrediction(input: DataFrame, selectedFeatures: Array[Int], baseModels: Array[DecisionTreeClassificationModel]): Map[Double, Array[Double]] = {
+  def calculateMomentsByPrediction(input: DataFrame, selectedFeatures: Array[Int], baseModels: Array[DecisionTreeClassificationModel]): DataFrame = {
     var dataset = input.select(col("*"))
     val selFNames = selectedFeatures.map(item => COL_PREFIX + item)
     val schema = StructType(Seq(
@@ -88,12 +88,33 @@ object Util {
       dataset = baseModels(index).setPredictionCol(PREDICTION + "_" + index).transform(dataset).drop(COLUMNS2DROP: _*)
       aggregate = aggregate.union(dataset.withColumnRenamed(PREDICTION + "_" + index, PREDICTION).groupBy(PREDICTION).agg(count(PREDICTION), selFNames.map(avg): _*))
     }
-    val weightedMean = aggregate.groupBy(PREDICTION).agg(sum(PREDICTION + COUNT_SUFFIX), selFNames.map(_ + AVERAGE_SUFFIX).map(col).map(_ * col(PREDICTION + COUNT_SUFFIX)).map(sum): _*)
+    aggregate.groupBy(PREDICTION).agg(sum(PREDICTION + COUNT_SUFFIX), selFNames.map(_ + AVERAGE_SUFFIX).map(col).map(_ * col(PREDICTION + COUNT_SUFFIX)).map(sum): _*)
+  }
+
+  def calculateMomentsByPredictionCollectively(input: DataFrame, selectedFeatures: Array[Int], baseModels: Array[DecisionTreeClassificationModel]): Map[Double, Array[Double]] = {
+    val weightedMean = calculateMomentsByPrediction(input, selectedFeatures, baseModels)
     val moments = mutable.Map[Double, Array[Double]]()
     for (row <- weightedMean.collect()) {
       moments.put(parseDouble(row.getDouble(0)), row.toSeq.takeRight(row.length - 2).toArray.map(parseDouble).map(_ / row.getLong(1)))
     }
     moments.toMap
+  }
+
+  def calculateMomentsByPredictionRespectively(input: Array[DataFrame], selectedFeatures: Array[Int], baseModels: Array[DecisionTreeClassificationModel]): Map[Double, Array[Double]] = {
+    val selFNames = selectedFeatures.map(item => COL_PREFIX + item)
+    val schema = StructType(Seq(
+      StructField(PREDICTION, DoubleType, nullable = false),
+      StructField("sum(" + PREDICTION + COUNT_SUFFIX + ")", LongType, nullable = false)
+    ) ++ selFNames.map("sum((" + _ + AVERAGE_SUFFIX + " * " + PREDICTION + COUNT_SUFFIX + "))").map(item => StructField(item, DoubleType, nullable = true)))
+    var aggregate = SparkEmbedded.ss.createDataFrame(SparkEmbedded.ss.sparkContext.emptyRDD[Row], schema)
+    var moments = mutable.Map[Double, Array[Double]]()
+    for (index <- baseModels.indices) {
+      val baseMoments = calculateMomentsByPrediction(input(index), selectedFeatures, Array(baseModels(index)))
+      aggregate = aggregate.union(baseMoments)
+    }
+    val results = aggregate.groupBy(PREDICTION).agg(sum("sum(" + PREDICTION + COUNT_SUFFIX + ")"),
+      selFNames.map("sum((" + _ + AVERAGE_SUFFIX + " * " + PREDICTION + COUNT_SUFFIX + "))").map(col).map(_ * col("sum(" + PREDICTION + COUNT_SUFFIX + ")")).map(sum):_*)
+    Map.empty
   }
 
 }
