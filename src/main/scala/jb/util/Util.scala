@@ -1,5 +1,8 @@
 package jb.util
 
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+
 import jb.server.SparkEmbedded
 import jb.util.Const._
 import org.apache.spark.ml.PipelineModel
@@ -101,22 +104,34 @@ object Util {
   }
 
   def calculateMomentsByPredictionRespectively(input: Array[DataFrame], selectedFeatures: Array[Int], baseModels: Array[DecisionTreeClassificationModel]): Map[Double, Array[Double]] = {
+    var first = LocalDateTime.now
     val selFNames = selectedFeatures.map(item => COL_PREFIX + item)
     val schema = StructType(Seq(
       StructField(PREDICTION, DoubleType, nullable = false),
       StructField("sum(" + PREDICTION + COUNT_SUFFIX + ")", LongType, nullable = false)
     ) ++ selFNames.map("sum((" + _ + AVERAGE_SUFFIX + " * " + PREDICTION + COUNT_SUFFIX + "))").map(item => StructField(item, DoubleType, nullable = true)))
     var aggregate = SparkEmbedded.ss.createDataFrame(SparkEmbedded.ss.sparkContext.emptyRDD[Row], schema)
+    var second = LocalDateTime.now
+    println(s"Preparation: ${ChronoUnit.MILLIS.between(first, second)}")
+    first = LocalDateTime.now
     for (index <- baseModels.indices) {
       val baseMoments = calculateMomentsByPrediction(input(index), selectedFeatures, Array(baseModels(index)))
       aggregate = aggregate.union(baseMoments)
     }
+    second = LocalDateTime.now
+    println(s"Singular mappings: ${ChronoUnit.MILLIS.between(first, second)}")
+    first = LocalDateTime.now
     val weightedMoments = aggregate.groupBy(PREDICTION).agg(sum("sum(" + PREDICTION + COUNT_SUFFIX + ")"),
       selFNames.map("sum((" + _ + AVERAGE_SUFFIX + " * " + PREDICTION + COUNT_SUFFIX + "))").map(col).map(sum):_*)
+    second = LocalDateTime.now
+    println(s"Aggregation: ${ChronoUnit.MILLIS.between(first, second)}")
+    first = LocalDateTime.now
     var moments = mutable.Map[Double, Array[Double]]()
     for (row <- weightedMoments.collect()) {
       moments.put(parseDouble(row.getDouble(0)), row.toSeq.takeRight(row.length - 2).toArray.map(parseDouble).map(_ / row.getLong(1)))
     }
+    second = LocalDateTime.now
+    println(s"Composition: ${ChronoUnit.MILLIS.between(first, second)}")
     moments.toMap
   }
 

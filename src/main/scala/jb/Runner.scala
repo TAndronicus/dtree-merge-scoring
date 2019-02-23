@@ -1,5 +1,7 @@
 package jb
 
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.stream.IntStream
 
 import jb.io.FileReader.getRawInput
@@ -58,7 +60,6 @@ class Runner(val nClassif: Int, var nFeatures: Int, val alpha: Double) {
 //    val preMappingMoments = calculateMomentsByLabels(input, getSelectedFeatures(dataPrepModel))
 //    val postMappingValidationMoments = calculateMomentsByPredictionCollectively(cvSubset, getSelectedFeatures(dataPrepModel), baseModels)
     val postMappingValidationMoments = calculateMomentsByPredictionRespectively(trainingSubsets, getSelectedFeatures(dataPrepModel), baseModels)
-    postMappingValidationMoments.mapValues(_.map(_.toString).reduce((d1, d2) => d1 + "_" + d2)).foreach(println)
     val integratedModel = new MappedIntegratedDecisionTreeModel(edges, baseModels, postMappingValidationMoments, parametrizedMomentMappingFunction(alpha))
     val iPredictions = integratedModel.transform(testedSubset)
     result :+= testIAcc(iPredictions, testedSubset)
