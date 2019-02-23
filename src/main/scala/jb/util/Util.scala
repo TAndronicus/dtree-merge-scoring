@@ -1,16 +1,13 @@
 package jb.util
 
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
-
 import jb.server.SparkEmbedded
 import jb.util.Const._
 import org.apache.spark.ml.PipelineModel
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel
 import org.apache.spark.ml.feature.ChiSqSelectorModel
-import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{DoubleType, LongType, StructField, StructType}
+import org.apache.spark.sql.{DataFrame, Dataset, Row}
 
 import scala.collection.mutable
 
@@ -92,6 +89,7 @@ object Util {
       aggregate = aggregate.union(dataset.withColumnRenamed(PREDICTION + "_" + index, PREDICTION).groupBy(PREDICTION).agg(count(PREDICTION), selFNames.map(avg): _*))
     }
     aggregate.groupBy(PREDICTION).agg(sum(PREDICTION + COUNT_SUFFIX), selFNames.map(_ + AVERAGE_SUFFIX).map(col).map(_ * col(PREDICTION + COUNT_SUFFIX)).map(sum): _*)
+    aggregate.cache
   }
 
   def calculateMomentsByPredictionCollectively(input: DataFrame, selectedFeatures: Array[Int], baseModels: Array[DecisionTreeClassificationModel]): Map[Double, Array[Double]] = {
@@ -100,38 +98,33 @@ object Util {
     for (row <- weightedMean.collect()) {
       moments.put(parseDouble(row.getDouble(0)), row.toSeq.takeRight(row.length - 2).toArray.map(parseDouble).map(_ / row.getLong(1)))
     }
+    weightedMean.unpersist
     moments.toMap
   }
 
   def calculateMomentsByPredictionRespectively(input: Array[DataFrame], selectedFeatures: Array[Int], baseModels: Array[DecisionTreeClassificationModel]): Map[Double, Array[Double]] = {
-    var first = LocalDateTime.now
     val selFNames = selectedFeatures.map(item => COL_PREFIX + item)
     val schema = StructType(Seq(
       StructField(PREDICTION, DoubleType, nullable = false),
       StructField("sum(" + PREDICTION + COUNT_SUFFIX + ")", LongType, nullable = false)
     ) ++ selFNames.map("sum((" + _ + AVERAGE_SUFFIX + " * " + PREDICTION + COUNT_SUFFIX + "))").map(item => StructField(item, DoubleType, nullable = true)))
     var aggregate = SparkEmbedded.ss.createDataFrame(SparkEmbedded.ss.sparkContext.emptyRDD[Row], schema)
-    var second = LocalDateTime.now
-    println(s"Preparation: ${ChronoUnit.MILLIS.between(first, second)}")
-    first = LocalDateTime.now
     for (index <- baseModels.indices) {
       val baseMoments = calculateMomentsByPrediction(input(index), selectedFeatures, Array(baseModels(index)))
       aggregate = aggregate.union(baseMoments)
+      baseMoments.unpersist
     }
-    second = LocalDateTime.now
-    println(s"Singular mappings: ${ChronoUnit.MILLIS.between(first, second)}")
-    first = LocalDateTime.now
-    val weightedMoments = aggregate.groupBy(PREDICTION).agg(sum("sum(" + PREDICTION + COUNT_SUFFIX + ")"),
-      selFNames.map("sum((" + _ + AVERAGE_SUFFIX + " * " + PREDICTION + COUNT_SUFFIX + "))").map(col).map(sum):_*)
-    second = LocalDateTime.now
-    println(s"Aggregation: ${ChronoUnit.MILLIS.between(first, second)}")
-    first = LocalDateTime.now
-    var moments = mutable.Map[Double, Array[Double]]()
+    aggregate.cache
+    val avgName = (item: String) => "sum((" + item + AVERAGE_SUFFIX + " * " + PREDICTION + COUNT_SUFFIX + "))"
+    val sumName = "sum(" + PREDICTION + COUNT_SUFFIX + ")"
+    val weightedMoments = aggregate.groupBy(PREDICTION).agg(sum(sumName),
+      selFNames.map(avgName).map(col).map(sum): _*)
+    val moments = mutable.Map[Double, Array[Double]]()
     for (row <- weightedMoments.collect()) {
       moments.put(parseDouble(row.getDouble(0)), row.toSeq.takeRight(row.length - 2).toArray.map(parseDouble).map(_ / row.getLong(1)))
     }
-    second = LocalDateTime.now
-    println(s"Composition: ${ChronoUnit.MILLIS.between(first, second)}")
+    aggregate.unpersist
+    weightedMoments.unpersist
     moments.toMap
   }
 
