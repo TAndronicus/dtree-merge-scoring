@@ -26,16 +26,16 @@ class MappedIntegratedDecisionTreeModel(val edges: Array[Array[Edge]], val baseM
       .reduce((l1, l2) => if (l1._2 > l2._2) l1 else l2)._1
   }
 
-  private def predictLabel(obj: Array[Double], baseModel: DecisionTreeClassificationModel): Double = {
-    baseModel.predict(new DenseVector(obj))
+  def weightedDist(index: Int, obj: Array[Double]): Double = {
+    distMappingFunction(minDistUnsigned(edges(index), obj), distFromMoment(index, obj))
   }
 
   def distFromMoment(index: Int, obj: Array[Double]): Double = {
     pointDist(obj, moments(predictLabel(obj, baseModels(index))))
   }
 
-  def weightedDist(index: Int, obj: Array[Double]): Double = {
-    distMappingFunction(minDistUnsigned(edges(index), obj), distFromMoment(index, obj))
+  private def predictLabel(obj: Array[Double], baseModel: DecisionTreeClassificationModel): Double = {
+    baseModel.predict(new DenseVector(obj))
   }
 
   def minDistUnsigned(edgeModel: Array[Edge], obj: Array[Double]): Double = {

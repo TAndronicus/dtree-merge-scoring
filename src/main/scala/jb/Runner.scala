@@ -4,7 +4,7 @@ import java.util.stream.IntStream
 
 import jb.io.FileReader.getRawInput
 import jb.model.Rect
-import jb.model.dt.{IntegratedDecisionTreeModel, MappedIntegratedDecisionTreeModel}
+import jb.model.dt.MappedIntegratedDecisionTreeModel
 import jb.parser.TreeParser
 import jb.prediction.Predictions.predictBaseClfs
 import jb.selector.FeatureSelectors
@@ -54,9 +54,9 @@ class Runner(val nClassif: Int, var nFeatures: Int, val alpha: Double) {
     val rects = baseModels.map(model => treeParser.dt2rect(rootRect, model.rootNode))
     val edges = rects.map(treeParser.rects2edges)
 
-//        val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels, simpleMapping)
-//    val preMappingMoments = calculateMomentsByLabels(input, getSelectedFeatures(dataPrepModel))
-//    val postMappingValidationMoments = calculateMomentsByPredictionCollectively(cvSubset, getSelectedFeatures(dataPrepModel), baseModels)
+    //    val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels, simpleMapping)
+    //    val preMappingMoments = calculateMomentsByLabels(input, getSelectedFeatures(dataPrepModel))
+    //    val postMappingValidationMoments = calculateMomentsByPredictionCollectively(cvSubset, getSelectedFeatures(dataPrepModel), baseModels)
     val postMappingValidationMoments = calculateMomentsByPredictionRespectively(trainingSubsets, getSelectedFeatures(dataPrepModel), baseModels)
     val integratedModel = new MappedIntegratedDecisionTreeModel(edges, baseModels, postMappingValidationMoments, parametrizedMomentMappingFunction(alpha))
     val iPredictions = integratedModel.transform(testedSubset)
