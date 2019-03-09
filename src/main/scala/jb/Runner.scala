@@ -9,7 +9,7 @@ import jb.parser.TreeParser
 import jb.prediction.Predictions.predictBaseClfs
 import jb.selector.FeatureSelectors
 import jb.server.SparkEmbedded
-import jb.tester.Tester.{testIAcc, testMvAcc}
+import jb.tester.FullTester.{testMv, testI}
 import jb.util.Const._
 import jb.util.Util._
 import jb.util.functions.DistMappingFunctions._
@@ -46,8 +46,7 @@ class Runner(val nClassif: Int, var nFeatures: Int, val alpha: Double) {
     val baseModels = trainingSubsets.map(subset => dt.fit(subset))
 
     val testedSubset = predictBaseClfs(baseModels, testSubset)
-    val mvQualityMeasure = testMvAcc(testedSubset, nClassif)
-    var result = Array(mvQualityMeasure)
+    val mvQualityMeasure = testMv(testedSubset, nClassif)
 
     val rootRect = Rect(mins, maxes)
     val treeParser = new TreeParser()
@@ -60,11 +59,12 @@ class Runner(val nClassif: Int, var nFeatures: Int, val alpha: Double) {
     val postMappingValidationMoments = calculateMomentsByPredictionRespectively(trainingSubsets, getSelectedFeatures(dataPrepModel), baseModels)
     val integratedModel = new MappedIntegratedDecisionTreeModel(edges, baseModels, postMappingValidationMoments, parametrizedMomentMappingFunction(alpha))
     val iPredictions = integratedModel.transform(testedSubset)
-    result :+= testIAcc(iPredictions, testedSubset)
+    val iQualityMeasure = testI(iPredictions, testedSubset)
 
     clearCache(subsets)
 
-    result
+    Array(mvQualityMeasure._1, mvQualityMeasure._2, iQualityMeasure._1, iQualityMeasure._2)
+
   }
 
 }

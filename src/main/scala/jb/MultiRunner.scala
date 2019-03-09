@@ -28,7 +28,7 @@ object MultiRunner {
   }
 
   private def getResultCatcher: ResultCatcher = {
-    new LeastBatchExhaustiveResultCatcher(0.3, 10, 150, 250)
+    new LeastBatchExhaustiveResultCatcher(0.3, 2, 5, 25)
   }
 
 }
