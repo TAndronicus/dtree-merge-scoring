@@ -6,13 +6,13 @@ import jb.util.result.{LeastBatchExhaustiveResultCatcher, ResultCatcher}
 object MultiRunner {
 
 
-  def run(nClassif: Int, nFeatures: Int, divisions: Int): Unit = {
+  def run(nClassif: Int, nFeatures: Int, alpha: Double): Unit = {
     val filenames = Array("bi", "bu", "c", "d", "h", "i", "m", "p", "se", "t", "wd", "wi")
 
-    val runner = new Runner(nClassif, nFeatures, divisions)
+    val runner = new Runner(nClassif, nFeatures, alpha)
     val resultCatcher = runForFiles(runner)(filenames)
 
-    resultCatcher.writeScores(Array(nClassif.toString, nFeatures.toString, divisions.toString))
+    resultCatcher.writeScores(Array(nClassif.toString, nFeatures.toString, alpha.toString))
   }
 
   private def runForFiles(runner: Runner)(filenames: Array[String]): ResultCatcher = {
@@ -28,7 +28,7 @@ object MultiRunner {
   }
 
   private def getResultCatcher: ResultCatcher = {
-    new LeastBatchExhaustiveResultCatcher(0.3, 2, 5, 25)
+    new LeastBatchExhaustiveResultCatcher(0.4, 10, 150, 350)
   }
 
 }
