@@ -18,17 +18,21 @@ object MultiRunner {
   private def runForFiles(runner: Runner)(filenames: Array[String]): ResultCatcher = {
     val resultCatcher = getResultCatcher
     while (resultCatcher.canConsume && !resultCatcher.isFull) {
-      val scores = new Array[Array[Double]](filenames.length)
-      for (index <- filenames.indices) {
-        scores(index) = runner.calculateMvIScores(FILENAME_PREFIX + filenames(index))
+      try {
+        val scores = new Array[Array[Double]](filenames.length)
+        for (index <- filenames.indices) {
+          scores(index) = runner.calculateMvIScores(FILENAME_PREFIX + filenames(index))
+        }
+        resultCatcher.consume(scores)
+      } catch {
+        case e: Throwable => println("Caught " + e.getMessage)
       }
-      resultCatcher.consume(scores)
     }
     resultCatcher
   }
 
   private def getResultCatcher: ResultCatcher = {
-    new LeastBatchExhaustiveResultCatcher(0.4, 10, 150, 350)
+    new LeastBatchExhaustiveResultCatcher(0.5, 10, 150, 350)
   }
 
 }
