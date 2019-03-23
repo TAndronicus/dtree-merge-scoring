@@ -1,14 +1,24 @@
 package jb;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 public class JavaPlayground {
 
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        int choice = sc.nextInt();
-//        sc.nextLine();
-        System.out.println("You picked " + choice);
+        System.out.println(getMonthsInYear());
+    }
+
+    public static int getMonthsInYear() {
+        try {
+            return 10;
+        }
+        finally {
+            System.out.println("heh");
+        }
     }
 
 }

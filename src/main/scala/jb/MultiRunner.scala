@@ -12,7 +12,7 @@ object MultiRunner {
     val runner = new Runner(nClassif, nFeatures, alpha)
     val resultCatcher = runForFiles(runner)(filenames)
 
-    resultCatcher.writeScores(Array(nClassif.toString, nFeatures.toString, alpha.toString))
+    resultCatcher.writeScores(Array(nClassif.toString, alpha.toString))
   }
 
   private def runForFiles(runner: Runner)(filenames: Array[String]): ResultCatcher = {
@@ -32,7 +32,7 @@ object MultiRunner {
   }
 
   private def getResultCatcher: ResultCatcher = {
-    new LeastBatchExhaustiveResultCatcher(0.5, 10, 150, 350)
+    new LeastBatchExhaustiveResultCatcher(0.4, 10, 150, Integer.MAX_VALUE)
   }
 
 }

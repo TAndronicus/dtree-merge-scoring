@@ -8,8 +8,8 @@ object ExperimentPlan {
     SparkEmbedded.setLogError()
     val nClassifs = Array(3, 5, 7)
     val nFeatures = 2
-    val alpha = .3
-    for (nC <- nClassifs) {
+    val alphas = Array(1)
+    for (nC <- nClassifs; alpha <- alphas) {
       MultiRunner.run(nC, nFeatures, alpha)
     }
   }

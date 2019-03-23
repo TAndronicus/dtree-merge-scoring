@@ -53,17 +53,18 @@ class Runner(val nClassif: Int, var nFeatures: Int, val alpha: Double) {
     val rects = baseModels.map(model => treeParser.dt2rect(rootRect, model.rootNode))
     val edges = rects.map(treeParser.rects2edges)
 
-        val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels, simpleMapping)
-    //    val preMappingMoments = calculateMomentsByLabels(input, getSelectedFeatures(dataPrepModel))
-//        val postMappingValidationMoments = calculateMomentsByPredictionCollectively(cvSubset, getSelectedFeatures(dataPrepModel), baseModels)
+//        val integratedModel = new IntegratedDecisionTreeModel(edges, baseModels, simpleMapping)
+//        val preMappingMoments = calculateMomentsByLabels(input, getSelectedFeatures(dataPrepModel))
+        val postMappingValidationMoments = calculateMomentsByPredictionCollectively(cvSubset, getSelectedFeatures(dataPrepModel), baseModels)
 //    val postMappingValidationMoments = calculateMomentsByPredictionRespectively(trainingSubsets, getSelectedFeatures(dataPrepModel), baseModels)
-//    val integratedModel = new MappedIntegratedDecisionTreeModel(edges, baseModels, postMappingValidationMoments, parametrizedMomentMappingFunction(alpha))
+    val integratedModel = new MappedIntegratedDecisionTreeModel(edges, baseModels, postMappingValidationMoments, parametrizedMomentMappingFunction(alpha))
     val iPredictions = integratedModel.transform(testedSubset)
     val iQualityMeasure = testI(iPredictions, testedSubset)
 
     clearCache(subsets)
 
-    Array(mvQualityMeasure._1, mvQualityMeasure._2, iQualityMeasure._1, iQualityMeasure._2)
+    Array(mvQualityMeasure._1, if(mvQualityMeasure._2.isNaN) 0D else mvQualityMeasure._2,
+      iQualityMeasure._1, if(iQualityMeasure._2.isNaN) 0D else iQualityMeasure._2)
 
   }
 
