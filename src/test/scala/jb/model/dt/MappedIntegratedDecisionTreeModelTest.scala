@@ -8,8 +8,7 @@ class MappedIntegratedDecisionTreeModelTest extends FunSuite {
   test("point dist") {
     val model = new MappedIntegratedDecisionTreeModel(null, null, null, null)
     val (x, y) = (2, 3.5)
-    val dist = model.pointDist(Array(x, y), Array(x + 3, y + 4))
-    assert(dist == 5)
+    assert(model.pointDist(Array(x, y), Array(x + 3, y + 4)) == 5)
   }
 
   test("edge overlapping") {
