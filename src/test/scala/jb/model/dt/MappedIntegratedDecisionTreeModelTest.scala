@@ -16,6 +16,7 @@ class MappedIntegratedDecisionTreeModelTest extends FunSuite {
     val edge0 = Edge(Array(0, 0), Array(2, 0))
     val edge1 = Edge(Array(0, 1), Array(0, 2))
     val point = Array(1D, 0)
+
     assert(model.edgeOvelaps(edge0, point, 0))
     assert(!model.edgeOvelaps(edge0, point, 1))
     assert(!model.edgeOvelaps(edge1, point, 0))
