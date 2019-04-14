@@ -6,7 +6,8 @@ import org.apache.spark.ml.classification.DecisionTreeClassificationModel
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 import org.apache.spark.sql.DataFrame
 
-class MappedIntegratedDecisionTreeModel(val edges: Array[Array[Edge]], val baseModels: Array[DecisionTreeClassificationModel], val moments: Map[Double, Array[Double]], val distMappingFunction: (Double, Double) => Double) {
+class MappedIntegratedDecisionTreeModel(val edges: Array[Array[Edge]], val baseModels: Array[DecisionTreeClassificationModel],
+                                        val moments: Map[Double, Array[Double]], val distMappingFunction: (Double, Double) => Double) {
 
   def transform(dataframe: DataFrame): Array[Double] = {
     dataframe.select(FEATURES).collect().map({ row =>
@@ -38,20 +39,20 @@ class MappedIntegratedDecisionTreeModel(val edges: Array[Array[Edge]], val baseM
     baseModel.predict(new DenseVector(obj))
   }
 
-  def minDistUnsigned(edgeModel: Array[Edge], obj: Array[Double]): Double = {
+  def minDistUnsigned(edgeModel: Array[Edge], point: Array[Double]): Double = {
     if (edgeModel.isEmpty) {
       return .5 // Data is normalized
     }
-    edgeModel.map(edge => distUnsigned(edge, obj)).min
+    edgeModel.map(edge => distUnsigned(edge, point)).min
   }
 
-  def distUnsigned(edge: Edge, obj: Array[Double]): Double = {
-    if (edgeOvelaps(edge, obj, 0)) {
-      math.abs(edge.min(1) - obj(1))
-    } else if (edgeOvelaps(edge, obj, 1)) {
-      math.abs(edge.min(0) - obj(0))
+  def distUnsigned(edge: Edge, point: Array[Double]): Double = {
+    if (edgeOvelaps(edge, point, 0)) {
+      math.abs(edge.min(1) - point(1))
+    } else if (edgeOvelaps(edge, point, 1)) {
+      math.abs(edge.min(0) - point(0))
     } else {
-      math.min(pointDist(edge.min, obj), pointDist(edge.max, obj))
+      math.min(pointDist(edge.min, point), pointDist(edge.max, point))
     }
   }
 
@@ -59,8 +60,8 @@ class MappedIntegratedDecisionTreeModel(val edges: Array[Array[Edge]], val baseM
     math.sqrt(p1.indices.map(i => math.pow(p1(i) - p2(i), 2)).sum)
   }
 
-  private def edgeOvelaps(edge: Edge, obj: Array[Double], dim: Int): Boolean = {
-    edge.min(dim) <= obj(dim) && edge.max(dim) >= obj(dim) && edge.min(dim) != edge.max(dim)
+  def edgeOvelaps(edge: Edge, point: Array[Double], dim: Int): Boolean = {
+    edge.min(dim) <= point(dim) && edge.max(dim) >= point(dim) && edge.min(dim) != edge.max(dim)
   }
 
 }

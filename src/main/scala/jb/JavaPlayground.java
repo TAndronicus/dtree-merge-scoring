@@ -1,24 +1,17 @@
 package jb;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-public class JavaPlayground {
+import static org.spark_project.guava.primitives.Longs.asList;
 
+abstract class JavaPlayground {
     public static void main(String[] args) {
-        System.out.println(getMonthsInYear());
-    }
-
-    public static int getMonthsInYear() {
-        try {
-            return 10;
-        }
-        finally {
-            System.out.println("heh");
-        }
     }
 
 }
