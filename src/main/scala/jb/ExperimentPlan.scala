@@ -1,6 +1,6 @@
 package jb
 
-import jb.model.PreTraining
+import jb.model.{PostTrainingTrainFiltered, PreTraining}
 import jb.server.SparkEmbedded
 
 object ExperimentPlan {
