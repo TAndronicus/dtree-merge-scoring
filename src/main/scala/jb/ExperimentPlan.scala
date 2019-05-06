@@ -1,6 +1,6 @@
 package jb
 
-import jb.model.{PostTrainingTrainFiltered, PreTraining}
+import jb.model.{PostTrainingAll, PostTrainingAllFiltered, PostTrainingTrainFiltered, PreTraining}
 import jb.server.SparkEmbedded
 
 object ExperimentPlan {
@@ -11,7 +11,7 @@ object ExperimentPlan {
     val nFeatures = 2
     val alphas = Array(.3)
     for (nC <- nClassifs; alpha <- alphas) {
-      MultiRunner.run(nC, nFeatures, alpha, new PreTraining)
+      MultiRunner.run(nC, nFeatures, alpha, new PostTrainingAllFiltered)
     }
   }
 

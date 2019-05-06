@@ -3,8 +3,8 @@ package jb
 import java.util.stream.IntStream
 
 import jb.io.FileReader.getRawInput
-import jb.model.{Edge, MappingModel, PostTrainingCV, PostTrainingTrain, PostTrainingTrainFiltered, PreTraining, Rect}
-import jb.model.dt.{IntegratedDecisionTreeModel, MappedIntegratedDecisionTreeModel, SimpleIntegratedDecisionTreeModel}
+import jb.model.dt.{MappedIntegratedDecisionTreeModel, SimpleIntegratedDecisionTreeModel}
+import jb.model._
 import jb.parser.TreeParser
 import jb.prediction.Predictions.predictBaseClfs
 import jb.selector.FeatureSelectors
@@ -51,11 +51,17 @@ class Runner(val nClassif: Int, var nFeatures: Int, val alpha: Double, val mappi
     val edges: Array[Array[Edge]] = getEdges(mins, maxes, baseModels)
 
     val integratedModel = if (alpha == 1) new SimpleIntegratedDecisionTreeModel(edges, baseModels, simpleMapping) //TODO: Optimized decision tree model for mapping only
-    else mappingModel match {
-      case PreTraining() => new MappedIntegratedDecisionTreeModel(edges, baseModels, parametrizedMomentMappingFunction(alpha), calculateMomentsByLabels(input, getSelectedFeatures(dataPrepModel)))
-      case PostTrainingCV() => new MappedIntegratedDecisionTreeModel(edges, baseModels, parametrizedMomentMappingFunction(alpha), calculateMomentsByPredictionCollectively(cvSubset, getSelectedFeatures(dataPrepModel), baseModels))
-      case PostTrainingTrain() => new MappedIntegratedDecisionTreeModel(edges, baseModels, parametrizedMomentMappingFunction(alpha), calculateMomentsByPredictionRespectively(trainingSubsets, getSelectedFeatures(dataPrepModel), baseModels))
-      case PostTrainingTrainFiltered() => throw new Exception("not yet implemented")
+    else {
+      val moments = mappingModel match {
+        case PreTraining() => calculateMomentsByLabels(input, getSelectedFeatures(dataPrepModel))
+        case PostTrainingCV() => calculateMomentsByPredictionCollectively(cvSubset, getSelectedFeatures(dataPrepModel), baseModels, false)
+        case PostTrainingTrain() => calculateMomentsByPredictionRespectively(trainingSubsets, getSelectedFeatures(dataPrepModel), baseModels, false)
+        case PostTrainingAll() => calculateMomentsByPredictionCollectively(input, getSelectedFeatures(dataPrepModel), baseModels, false)
+        case PostTrainingCVFiltered() => calculateMomentsByPredictionCollectively(cvSubset, getSelectedFeatures(dataPrepModel), baseModels, true)
+        case PostTrainingTrainFiltered() => calculateMomentsByPredictionRespectively(trainingSubsets, getSelectedFeatures(dataPrepModel), baseModels, true)
+        case PostTrainingAllFiltered() => calculateMomentsByPredictionCollectively(input, getSelectedFeatures(dataPrepModel), baseModels, true)
+      }
+      new MappedIntegratedDecisionTreeModel(edges, baseModels, parametrizedMomentMappingFunction(alpha), moments)
     }
     val iPredictions = integratedModel.transform(testedSubset)
     val iQualityMeasure = testI(iPredictions, testedSubset)

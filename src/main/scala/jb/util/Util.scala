@@ -54,6 +54,11 @@ object Util {
     subsets.foreach(_.unpersist)
   }
 
+  /**
+    * Returns a tuple with array of training subsets, cv subset & testing subset
+    * @param subsets - array of subsets to dispense
+    * @return
+    */
   def dispenseSubsets(subsets: Array[DataFrame]): (Array[DataFrame], DataFrame, DataFrame) = {
     val trainingSubsets = subsets.take(subsets.length - 2)
     val cvSubset = subsets(subsets.length - 2)
@@ -75,25 +80,55 @@ object Util {
     moments.toMap
   }
 
-  def calculateMomentsByPrediction(input: DataFrame, selectedFeatures: Array[Int], baseModels: Array[DecisionTreeClassificationModel]): DataFrame = {
+  /**
+    * @param input dataset
+    * @param selectedFeatures columns to aggregate
+    * @param baseModels models to predict
+    * @return dataset with summed moments with the following schema:
+    *         |-------|-------|---------|---------|
+    *         | label | count | sum(x1) | sum(x2) |
+    *         |-------|-------|---------|---------|
+    *         where sums aggregate averages of different classifiers (sum(avg(clf_1), avg(clf_2), ..., avg(clf_n))
+    *
+    * SIDE EFFECT: returned dataframe is cached - it must be unpersisted after processing
+    *
+    */
+  def calculateMomentsByPrediction(
+                                    input: DataFrame,
+                                    selectedFeatures: Array[Int],
+                                    baseModels: Array[DecisionTreeClassificationModel],
+                                    filterLabels: Boolean): DataFrame = {
     var dataset = input.select(col("*"))
     val selFNames = selectedFeatures.map(item => COL_PREFIX + item)
     val schema = StructType(Seq(
-      StructField(PREDICTION, DoubleType, nullable = false),
-      StructField(PREDICTION + COUNT_SUFFIX, LongType, nullable = false)
-    ) ++ selFNames.map(_ + AVERAGE_SUFFIX).map(item => StructField(item, DoubleType, nullable = true)))
+      StructField(PREDICTION, DoubleType, nullable = false), // predicted label
+      StructField(PREDICTION + COUNT_SUFFIX, LongType, nullable = false) // count of objects composing the aggregate
+    ) ++ selFNames.map(_ + AVERAGE_SUFFIX).map(item => StructField(item, DoubleType, nullable = true))) // summed values of features
     var aggregate = SparkEmbedded.ss.createDataFrame(SparkEmbedded.ss.sparkContext.emptyRDD[Row], schema)
 
     for (index <- baseModels.indices) {
       dataset = baseModels(index).setPredictionCol(PREDICTION + "_" + index).transform(dataset).drop(COLUMNS2DROP: _*)
-      aggregate = aggregate.union(dataset.withColumnRenamed(PREDICTION + "_" + index, PREDICTION).groupBy(PREDICTION).agg(count(PREDICTION), selFNames.map(avg): _*))
+      if (filterLabels) dataset = dataset.where(PREDICTION + "_" + index + "=" + LABEL)
+      aggregate = aggregate.union(
+        dataset.drop(LABEL).withColumnRenamed(PREDICTION + "_" + index, PREDICTION).groupBy(PREDICTION).agg(count(PREDICTION), selFNames.map(avg): _*)
+      )
     }
     aggregate.groupBy(PREDICTION).agg(sum(PREDICTION + COUNT_SUFFIX), selFNames.map(_ + AVERAGE_SUFFIX).map(col).map(_ * col(PREDICTION + COUNT_SUFFIX)).map(sum): _*)
     aggregate.cache
   }
 
-  def calculateMomentsByPredictionCollectively(input: DataFrame, selectedFeatures: Array[Int], baseModels: Array[DecisionTreeClassificationModel]): Map[Double, Array[Double]] = {
-    val weightedMean = calculateMomentsByPrediction(input, selectedFeatures, baseModels)
+  /**
+    * @param input - dataset
+    * @param selectedFeatures - columns to aggregate
+    * @param baseModels - models to predict
+    * @return moments - map with labels as keys and moments (coordinates) as values
+    */
+  def calculateMomentsByPredictionCollectively(
+                                                input: DataFrame,
+                                                selectedFeatures: Array[Int],
+                                                baseModels: Array[DecisionTreeClassificationModel],
+                                                filterLabels: Boolean): Map[Double, Array[Double]] = {
+    val weightedMean = calculateMomentsByPrediction(input, selectedFeatures, baseModels, filterLabels)
     val moments = mutable.Map[Double, Array[Double]]()
     for (row <- weightedMean.collect()) {
       moments.put(parseDouble(row.getDouble(0)), row.toSeq.takeRight(row.length - 2).toArray.map(parseDouble).map(_ / row.getLong(1)))
@@ -102,7 +137,17 @@ object Util {
     moments.toMap
   }
 
-  def calculateMomentsByPredictionRespectively(input: Array[DataFrame], selectedFeatures: Array[Int], baseModels: Array[DecisionTreeClassificationModel]): Map[Double, Array[Double]] = {
+  /**
+    * @param input - array of datasets
+    * @param selectedFeatures - columns to aggregate
+    * @param baseModels - models to predict
+    * @return moments - map with labels as keys and moments (coordinates) as values
+    */
+  def calculateMomentsByPredictionRespectively(
+                                                input: Array[DataFrame],
+                                                selectedFeatures: Array[Int],
+                                                baseModels: Array[DecisionTreeClassificationModel],
+                                                filterLabels: Boolean): Map[Double, Array[Double]] = {
     val selFNames = selectedFeatures.map(item => COL_PREFIX + item)
     val schema = StructType(Seq(
       StructField(PREDICTION, DoubleType, nullable = false),
@@ -110,7 +155,7 @@ object Util {
     ) ++ selFNames.map("sum((" + _ + AVERAGE_SUFFIX + " * " + PREDICTION + COUNT_SUFFIX + "))").map(item => StructField(item, DoubleType, nullable = true)))
     var aggregate = SparkEmbedded.ss.createDataFrame(SparkEmbedded.ss.sparkContext.emptyRDD[Row], schema)
     for (index <- baseModels.indices) {
-      val baseMoments = calculateMomentsByPrediction(input(index), selectedFeatures, Array(baseModels(index)))
+      val baseMoments = calculateMomentsByPrediction(input(index), selectedFeatures, Array(baseModels(index)), filterLabels)
       aggregate = aggregate.union(baseMoments)
       baseMoments.unpersist
     }
