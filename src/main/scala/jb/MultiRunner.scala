@@ -1,15 +1,16 @@
 package jb
 
+import jb.model.MappingModel
 import jb.util.Const.FILENAME_PREFIX
 import jb.util.result.{LeastBatchExhaustiveResultCatcher, ResultCatcher}
 
 object MultiRunner {
 
 
-  def run(nClassif: Int, nFeatures: Int, alpha: Double): Unit = {
+  def run(nClassif: Int, nFeatures: Int, alpha: Double, mappingModel: MappingModel): Unit = {
     val filenames = Array("bi", "bu", "c", "d", "h", "i", "m", "p", "se", "t", "wd", "wi")
 
-    val runner = new Runner(nClassif, nFeatures, alpha)
+    val runner = new Runner(nClassif, nFeatures, alpha, mappingModel)
     val resultCatcher = runForFiles(runner)(filenames)
 
     resultCatcher.writeScores(Array(nClassif.toString, alpha.toString))

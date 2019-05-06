@@ -6,11 +6,10 @@ import org.apache.spark.ml.classification.DecisionTreeClassificationModel
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 import org.apache.spark.sql.DataFrame
 
-class MappedIntegratedDecisionTreeModel(
+class SimpleIntegratedDecisionTreeModel(
                                          val edges: Array[Array[Edge]],
                                          val baseModels: Array[DecisionTreeClassificationModel],
-                                         val distMappingFunction: (Double, Double) => Double,
-                                         val moments: Map[Double, Array[Double]]
+                                         val distMappingFunction: Double => Double
                                        )
   extends IntegratedDecisionTreeModel {
 
@@ -26,22 +25,11 @@ class MappedIntegratedDecisionTreeModel(
   }
 
   def transform(obj: Array[Double]): Double = {
-    edges.indices.map(i => (predictLabel(obj, baseModels(i)), weightedDist(i, obj)))
-      .groupBy(_._1)
-      .mapValues(_.map(_._2).sum)
-      .reduce((l1, l2) => if (l1._2 > l2._2) l1 else l2)._1
+    edges.indices.map(i => (baseModels(i).predict(new DenseVector(obj)), weightedDist(edges(i), obj))).groupBy(_._1).mapValues(_.map(_._2).sum).reduce((l1, l2) => if (l1._2 > l2._2) l1 else l2)._1
   }
 
-  def weightedDist(index: Int, obj: Array[Double]): Double = {
-    distMappingFunction(minDistUnsigned(edges(index), obj), distFromMoment(index, obj))
-  }
-
-  def distFromMoment(index: Int, obj: Array[Double]): Double = {
-    pointDist(obj, moments(predictLabel(obj, baseModels(index))))
-  }
-
-  private def predictLabel(obj: Array[Double], baseModel: DecisionTreeClassificationModel): Double = {
-    baseModel.predict(new DenseVector(obj))
+  def weightedDist(edgeModel: Array[Edge], obj: Array[Double]): Double = {
+    distMappingFunction(minDistUnsigned(edgeModel, obj))
   }
 
   def minDistUnsigned(edgeModel: Array[Edge], obj: Array[Double]): Double = {

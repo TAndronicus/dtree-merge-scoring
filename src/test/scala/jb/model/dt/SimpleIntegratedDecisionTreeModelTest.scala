@@ -3,10 +3,10 @@ package jb.model.dt
 import jb.model.Edge
 import org.scalatest.FunSuite
 
-class IntegratedDecisionTreeModelTest extends FunSuite {
+class SimpleIntegratedDecisionTreeModelTest extends FunSuite {
 
   test("point dist 2d") {
-    val model = new IntegratedDecisionTreeModel(null, null, i => i)
+    val model = new SimpleIntegratedDecisionTreeModel(null, null, i => i)
     assert(model.pointDist(Array(1, 1), Array(4, 5)) == 5)
   }
 
@@ -14,7 +14,7 @@ class IntegratedDecisionTreeModelTest extends FunSuite {
     // given
     val p = Array(1.5, 1.5)
     val edge = Edge(Array(0, -.5), Array(2, -.5))
-    val model = new IntegratedDecisionTreeModel(null, null, i => i)
+    val model = new SimpleIntegratedDecisionTreeModel(null, null, i => i)
 
     // when
     val dist = model.distUnsigned(edge, p)
@@ -27,7 +27,7 @@ class IntegratedDecisionTreeModelTest extends FunSuite {
     // given
     val p = Array(1.5, 1.5)
     val edge = Edge(Array(2, -.5), Array(2, 5))
-    val model = new IntegratedDecisionTreeModel(null, null, i => i)
+    val model = new SimpleIntegratedDecisionTreeModel(null, null, i => i)
 
     // when
     val dist = model.distUnsigned(edge, p)
@@ -40,7 +40,7 @@ class IntegratedDecisionTreeModelTest extends FunSuite {
     // given
     val p = Array(1.5, 1.5)
     val edge = Edge(Array(5.5, -5), Array(5.5, -1.5))
-    val model = new IntegratedDecisionTreeModel(null, null, i => i)
+    val model = new SimpleIntegratedDecisionTreeModel(null, null, i => i)
 
     // when
     val dist = model.distUnsigned(edge, p)
@@ -57,7 +57,7 @@ class IntegratedDecisionTreeModelTest extends FunSuite {
       Edge(Array(2, -.5), Array(2, 5)),
       Edge(Array(0, -.5), Array(2, -.5))
     )
-    val model = new IntegratedDecisionTreeModel(null, null, i => i)
+    val model = new SimpleIntegratedDecisionTreeModel(null, null, i => i)
 
     // when
     val dist = model.minDistUnsigned(edges, p)
