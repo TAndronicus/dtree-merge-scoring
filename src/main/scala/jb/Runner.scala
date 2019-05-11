@@ -3,8 +3,8 @@ package jb
 import java.util.stream.IntStream
 
 import jb.io.FileReader.getRawInput
-import jb.model.dt.{MappedIntegratedDecisionTreeModel, SimpleIntegratedDecisionTreeModel}
 import jb.model._
+import jb.model.dt.{CombinedIntegratedDecisionTreeModel, EdgeIntegratedDecisionTreeModel}
 import jb.parser.TreeParser
 import jb.prediction.Predictions.predictBaseClfs
 import jb.selector.FeatureSelectors
@@ -17,7 +17,7 @@ import jb.vectorizer.FeatureVectorizers.getFeatureVectorizer
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, DecisionTreeClassifier}
 
-class Runner(val nClassif: Int, var nFeatures: Int, val alpha: Double, val mappingModel: MappingModel) {
+class Runner(val nClassif: Int, var nFeatures: Int, val coefficients: Coefficients, val mappingModel: MappingModel) {
 
   def calculateMvIScores(filename: String): Array[Double] = {
 
@@ -50,7 +50,8 @@ class Runner(val nClassif: Int, var nFeatures: Int, val alpha: Double, val mappi
 
     val edges: Array[Array[Edge]] = getEdges(mins, maxes, baseModels)
 
-    val integratedModel = if (alpha == 1) new SimpleIntegratedDecisionTreeModel(edges, baseModels, simpleMapping) //TODO: Optimized decision tree model for mapping only
+    val integratedModel = if (coefficients.alpha == 1) new EdgeIntegratedDecisionTreeModel(baseModels, singleMapping(coefficients), edges)
+    else if (coefficients.alpha == 0) throw new RuntimeException("Not yet implemented") //TODO: Optimized decision tree model for mapping only
     else {
       val moments = mappingModel match {
         case PreTraining() => calculateMomentsByLabels(input, getSelectedFeatures(dataPrepModel))
@@ -61,7 +62,7 @@ class Runner(val nClassif: Int, var nFeatures: Int, val alpha: Double, val mappi
         case PostTrainingTrainFiltered() => calculateMomentsByPredictionRespectively(trainingSubsets, getSelectedFeatures(dataPrepModel), baseModels, true)
         case PostTrainingAllFiltered() => calculateMomentsByPredictionCollectively(input, getSelectedFeatures(dataPrepModel), baseModels, true)
       }
-      new MappedIntegratedDecisionTreeModel(edges, baseModels, parametrizedMomentMappingFunction(alpha), moments)
+      new CombinedIntegratedDecisionTreeModel(baseModels, composedMapping(coefficients), edges, moments)
     }
     val iPredictions = integratedModel.transform(testedSubset)
     val iQualityMeasure = testI(iPredictions, testedSubset)

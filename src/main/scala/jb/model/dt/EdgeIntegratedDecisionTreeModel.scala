@@ -6,10 +6,10 @@ import org.apache.spark.ml.classification.DecisionTreeClassificationModel
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 import org.apache.spark.sql.DataFrame
 
-class SimpleIntegratedDecisionTreeModel(
-                                         val edges: Array[Array[Edge]],
+class EdgeIntegratedDecisionTreeModel(
                                          val baseModels: Array[DecisionTreeClassificationModel],
-                                         val distMappingFunction: Double => Double
+                                         val distMappingFunction: Double => Double,
+                                         val edges: Array[Array[Edge]] // edges pro base model (edges.size == baseModels.size)
                                        )
   extends IntegratedDecisionTreeModel {
 
@@ -25,7 +25,10 @@ class SimpleIntegratedDecisionTreeModel(
   }
 
   def transform(obj: Array[Double]): Double = {
-    edges.indices.map(i => (baseModels(i).predict(new DenseVector(obj)), weightedDist(edges(i), obj))).groupBy(_._1).mapValues(_.map(_._2).sum).reduce((l1, l2) => if (l1._2 > l2._2) l1 else l2)._1
+    edges.indices.map(i => (baseModels(i).predict(new DenseVector(obj)), weightedDist(edges(i), obj))) // (label, weight)
+      .groupBy(_._1)
+      .mapValues(_.map(_._2).sum) // TODO: parametrize aggregation function
+      .reduce((l1, l2) => if (l1._2 > l2._2) l1 else l2)._1
   }
 
   def weightedDist(edgeModel: Array[Edge], obj: Array[Double]): Double = {
