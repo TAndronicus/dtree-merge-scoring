@@ -1,8 +1,6 @@
 package jb.parser
 
-import jb.model.{Edge, InternalSimpleNode, LeafSimpleNode, Rect}
-import jb.util.functions.DistMappingFunctions._
-import jb.util.functions.WithinDeterminers._
+import jb.model.{Edge, Rect}
 import org.scalatest.FunSuite
 
 class TreeParserTest extends FunSuite {

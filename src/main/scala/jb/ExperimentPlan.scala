@@ -1,6 +1,6 @@
 package jb
 
-import jb.model.{Coefficients, PostTrainingAll, PostTrainingAllFiltered, PostTrainingTrainFiltered, PreTraining}
+import jb.model.{Coefficients, PostTrainingAllFiltered}
 import jb.server.SparkEmbedded
 
 object ExperimentPlan {
@@ -9,7 +9,7 @@ object ExperimentPlan {
     SparkEmbedded.setLogError()
     val nClassifs = Array(3)
     val nFeatures = 2
-    val alphas = Array(0)
+    val alphas = Array(1)
     val (beta1, beta2) = (.5, 0)
     val (gamma1, gamma2) = (20, 20)
     for (nC <- nClassifs; alpha <- alphas) {

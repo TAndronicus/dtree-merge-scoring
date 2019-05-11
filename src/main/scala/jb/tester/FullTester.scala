@@ -13,11 +13,6 @@ object FullTester {
     calculateStatistics(mvLabels, refLabels)
   }
 
-  def testI(predictions: Array[Double], testSubset: DataFrame): (Double, Double) = {
-    val refLabels = getReferenceLabels(testSubset)
-    calculateStatistics(predictions, refLabels)
-  }
-
   private def getReferenceLabels(testedSubset: DataFrame): Array[Double] = {
     testedSubset.select(LABEL).collect().map(_.get(0)).map {
       case int: Int => int.toDouble
@@ -30,6 +25,11 @@ object FullTester {
     val (tp, tn, fp, fn) = (matched.getOrElse((1, 1), 0), matched.getOrElse((0, 0), 0), matched.getOrElse((1, 0), 0), matched.getOrElse((0, 1), 0))
     ((tp + tn).toDouble / (tp + tn + fp + fn),
       (tp * tn - fp * fn).toDouble / math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)))
+  }
+
+  def testI(predictions: Array[Double], testSubset: DataFrame): (Double, Double) = {
+    val refLabels = getReferenceLabels(testSubset)
+    calculateStatistics(predictions, refLabels)
   }
 
 }

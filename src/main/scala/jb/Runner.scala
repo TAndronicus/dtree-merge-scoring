@@ -13,6 +13,7 @@ import jb.tester.FullTester.{testI, testMv}
 import jb.util.Const._
 import jb.util.Util._
 import jb.util.functions.DistMappingFunctions._
+import jb.util.functions.WeightAggregators.sumOfWeights
 import jb.vectorizer.FeatureVectorizers.getFeatureVectorizer
 import org.apache.spark.ml.Pipeline
 import org.apache.spark.ml.classification.{DecisionTreeClassificationModel, DecisionTreeClassifier}
@@ -59,9 +60,9 @@ class Runner(val nClassif: Int, var nFeatures: Int, val coefficients: Coefficien
       case PostTrainingAllFiltered() => calculateMomentsByPredictionCollectively(input, getSelectedFeatures(dataPrepModel), baseModels, true)
     } else null
     val integratedModel =
-      if (coefficients.onlyEdgeDependent) new EdgeIntegratedDecisionTreeModel(baseModels, singleMapping(coefficients), edges)
-      else if (coefficients.onlyMomentDependent) new MomentIntegratedDecisionTreeModel(baseModels, singleMapping(coefficients), moments)
-      else new CombinedIntegratedDecisionTreeModel(baseModels, composedMapping(coefficients), edges, moments)
+      if (coefficients.onlyEdgeDependent) new EdgeIntegratedDecisionTreeModel(baseModels, singleMapping(coefficients), sumOfWeights, edges)
+      else if (coefficients.onlyMomentDependent) new MomentIntegratedDecisionTreeModel(baseModels, singleMapping(coefficients), sumOfWeights, moments)
+      else new CombinedIntegratedDecisionTreeModel(baseModels, composedMapping(coefficients), sumOfWeights, edges, moments)
     val iPredictions = integratedModel.transform(testedSubset)
     val iQualityMeasure = testI(iPredictions, testedSubset)
 

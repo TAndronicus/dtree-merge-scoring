@@ -11,7 +11,7 @@ class IntegratedDecisionTreeUtilTest extends FunSuite {
   }
 
   test("edge overlapping") {
-    val model = new CombinedIntegratedDecisionTreeModel(null, null, null, null)
+    val model = new CombinedIntegratedDecisionTreeModel(null, null, null, null, null)
     val edge0 = Edge(Array(0, 0), Array(2, 0))
     val edge1 = Edge(Array(0, 1), Array(0, 2))
     val point = Array(1D, 0)

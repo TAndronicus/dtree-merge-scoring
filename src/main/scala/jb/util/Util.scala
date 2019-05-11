@@ -24,15 +24,6 @@ object Util {
     (mins, maxs)
   }
 
-  def parseDouble(value: Any): Double = {
-    value match {
-      case int: Int =>
-        int.toDouble
-      case double: Double =>
-        double
-    }
-  }
-
   def optimizeInput(input: DataFrame, dataPrepModel: PipelineModel): DataFrame = {
     dataPrepModel.transform(input).select(
       Util.getSelectedFeatures(dataPrepModel).map(
@@ -56,6 +47,7 @@ object Util {
 
   /**
     * Returns a tuple with array of training subsets, cv subset & testing subset
+    *
     * @param subsets - array of subsets to dispense
     * @return
     */
@@ -81,16 +73,45 @@ object Util {
   }
 
   /**
-    * @param input dataset
+    * @param input            - dataset
+    * @param selectedFeatures - columns to aggregate
+    * @param baseModels       - models to predict
+    * @return moments - map with labels as keys and moments (coordinates) as values
+    */
+  def calculateMomentsByPredictionCollectively(
+                                                input: DataFrame,
+                                                selectedFeatures: Array[Int],
+                                                baseModels: Array[DecisionTreeClassificationModel],
+                                                filterLabels: Boolean): Map[Double, Array[Double]] = {
+    val weightedMean = calculateMomentsByPrediction(input, selectedFeatures, baseModels, filterLabels)
+    val moments = mutable.Map[Double, Array[Double]]()
+    for (row <- weightedMean.collect()) {
+      moments.put(parseDouble(row.getDouble(0)), row.toSeq.takeRight(row.length - 2).toArray.map(parseDouble).map(_ / row.getLong(1)))
+    }
+    weightedMean.unpersist
+    moments.toMap
+  }
+
+  def parseDouble(value: Any): Double = {
+    value match {
+      case int: Int =>
+        int.toDouble
+      case double: Double =>
+        double
+    }
+  }
+
+  /**
+    * @param input            dataset
     * @param selectedFeatures columns to aggregate
-    * @param baseModels models to predict
+    * @param baseModels       models to predict
     * @return dataset with summed moments with the following schema:
     *         |-------|-------|---------|---------|
     *         | label | count | sum(x1) | sum(x2) |
     *         |-------|-------|---------|---------|
     *         where sums aggregate averages of different classifiers (sum(avg(clf_1), avg(clf_2), ..., avg(clf_n))
     *
-    * SIDE EFFECT: returned dataframe is cached - it must be unpersisted after processing
+    *         SIDE EFFECT: returned dataframe is cached - it must be unpersisted after processing
     *
     */
   def calculateMomentsByPrediction(
@@ -118,29 +139,9 @@ object Util {
   }
 
   /**
-    * @param input - dataset
+    * @param input            - array of datasets
     * @param selectedFeatures - columns to aggregate
-    * @param baseModels - models to predict
-    * @return moments - map with labels as keys and moments (coordinates) as values
-    */
-  def calculateMomentsByPredictionCollectively(
-                                                input: DataFrame,
-                                                selectedFeatures: Array[Int],
-                                                baseModels: Array[DecisionTreeClassificationModel],
-                                                filterLabels: Boolean): Map[Double, Array[Double]] = {
-    val weightedMean = calculateMomentsByPrediction(input, selectedFeatures, baseModels, filterLabels)
-    val moments = mutable.Map[Double, Array[Double]]()
-    for (row <- weightedMean.collect()) {
-      moments.put(parseDouble(row.getDouble(0)), row.toSeq.takeRight(row.length - 2).toArray.map(parseDouble).map(_ / row.getLong(1)))
-    }
-    weightedMean.unpersist
-    moments.toMap
-  }
-
-  /**
-    * @param input - array of datasets
-    * @param selectedFeatures - columns to aggregate
-    * @param baseModels - models to predict
+    * @param baseModels       - models to predict
     * @return moments - map with labels as keys and moments (coordinates) as values
     */
   def calculateMomentsByPredictionRespectively(

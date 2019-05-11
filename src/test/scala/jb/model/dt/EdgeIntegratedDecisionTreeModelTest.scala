@@ -9,7 +9,7 @@ class EdgeIntegratedDecisionTreeModelTest extends FunSuite {
     // given
     val p = Array(1.5, 1.5)
     val edge = Edge(Array(0, -.5), Array(2, -.5))
-    val model = new EdgeIntegratedDecisionTreeModel(null, i => i, null)
+    val model = new EdgeIntegratedDecisionTreeModel(null, i => i, null, null)
 
     // when
     val dist = model.distUnsigned(edge, p)
@@ -22,7 +22,7 @@ class EdgeIntegratedDecisionTreeModelTest extends FunSuite {
     // given
     val p = Array(1.5, 1.5)
     val edge = Edge(Array(2, -.5), Array(2, 5))
-    val model = new EdgeIntegratedDecisionTreeModel(null, i => i, null)
+    val model = new EdgeIntegratedDecisionTreeModel(null, i => i, null, null)
 
     // when
     val dist = model.distUnsigned(edge, p)
@@ -35,7 +35,7 @@ class EdgeIntegratedDecisionTreeModelTest extends FunSuite {
     // given
     val p = Array(1.5, 1.5)
     val edge = Edge(Array(5.5, -5), Array(5.5, -1.5))
-    val model = new EdgeIntegratedDecisionTreeModel(null, i => i, null)
+    val model = new EdgeIntegratedDecisionTreeModel(null, i => i, null, null)
 
     // when
     val dist = model.distUnsigned(edge, p)
@@ -52,7 +52,7 @@ class EdgeIntegratedDecisionTreeModelTest extends FunSuite {
       Edge(Array(2, -.5), Array(2, 5)),
       Edge(Array(0, -.5), Array(2, -.5))
     )
-    val model = new EdgeIntegratedDecisionTreeModel(null, i => i, null)
+    val model = new EdgeIntegratedDecisionTreeModel(null, i => i, null, null)
 
     // when
     val dist = model.minDistUnsigned(edges, p)

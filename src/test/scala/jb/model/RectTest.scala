@@ -3,7 +3,7 @@ package jb.model
 import jb.util.functions.WithinDeterminers._
 import org.scalatest.FunSuite
 
-class RectTest extends FunSuite{
+class RectTest extends FunSuite {
 
   test("Rect creation") {
     val rect = Rect(Array(0D), Array(1.5))

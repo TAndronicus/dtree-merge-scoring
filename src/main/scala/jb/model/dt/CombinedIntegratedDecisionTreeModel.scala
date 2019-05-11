@@ -1,18 +1,19 @@
 package jb.model.dt
 
 import jb.model.Edge
-import jb.util.Const.FEATURES
 import jb.model.dt.IntegratedDecisionTreeUtil.{edgeOvelaps, pointDist}
+import jb.util.Const.FEATURES
 import org.apache.spark.ml.classification.DecisionTreeClassificationModel
 import org.apache.spark.ml.linalg.{DenseVector, SparseVector}
 import org.apache.spark.sql.DataFrame
 
 class CombinedIntegratedDecisionTreeModel(
-                                         val baseModels: Array[DecisionTreeClassificationModel],
-                                         val distMappingFunction: (Double, Double) => Double,
-                                         val edges: Array[Array[Edge]],
-                                         val moments: Map[Double, Array[Double]]
-                                       )
+                                           val baseModels: Array[DecisionTreeClassificationModel],
+                                           val distMappingFunction: (Double, Double) => Double,
+                                           val weightAggregator: IndexedSeq[(Double, Double)] => Double,
+                                           val edges: Array[Array[Edge]],
+                                           val moments: Map[Double, Array[Double]]
+                                         )
   extends IntegratedDecisionTreeModel {
 
   override def transform(dataframe: DataFrame): Array[Double] = {
@@ -32,7 +33,7 @@ class CombinedIntegratedDecisionTreeModel(
       (label, weightedDist(i, obj, label))
     }) // (label, weight)
       .groupBy(_._1)
-      .mapValues(_.map(_._2).sum) // TODO
+      .mapValues(weightAggregator)
       .reduce((l1, l2) => if (l1._2 > l2._2) l1 else l2)._1
   }
 
