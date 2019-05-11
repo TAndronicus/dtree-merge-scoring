@@ -23,6 +23,14 @@ class Coefficients(
 
   def getGamma: Double = if (alpha == 0) gamma1 else if (alpha == 1) gamma2 else throw new RuntimeException("Ambiguous coefficient")
 
+  def edgeDependent = alpha != 0
+
+  def onlyEdgeDependent = alpha == 1
+
+  def momentDependent = alpha != 1
+
+  def onlyMomentDependent = alpha == 0
+
 }
 
 object Coefficients {
