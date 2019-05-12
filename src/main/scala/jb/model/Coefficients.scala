@@ -31,6 +31,8 @@ class Coefficients(
 
   def onlyMomentDependent = alpha == 0
 
+  def getAllCoefficients = Array(alpha, beta1, beta2, gamma1, gamma2)
+
 }
 
 object Coefficients {
