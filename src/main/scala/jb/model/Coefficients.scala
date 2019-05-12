@@ -2,10 +2,10 @@ package jb.model
 
 class Coefficients(
                     val alpha: Double,
-                    val beta1: Double,
-                    val beta2: Double,
-                    val gamma1: Double,
-                    val gamma2: Double
+                    val beta1: Double, // edge
+                    val beta2: Double, // mapping
+                    val gamma1: Double, // edge
+                    val gamma2: Double // mapping
                   ) {
 
   def validate(): Unit = {
@@ -19,9 +19,9 @@ class Coefficients(
     require(gamma2 >= 1)
   }
 
-  def getBeta: Double = if (alpha == 0) beta1 else if (alpha == 1) beta2 else throw new RuntimeException("Ambiguous coefficient")
+  def getBeta: Double = if (onlyEdgeDependent) beta1 else if (onlyMomentDependent) beta2 else throw new RuntimeException("Ambiguous coefficient")
 
-  def getGamma: Double = if (alpha == 0) gamma1 else if (alpha == 1) gamma2 else throw new RuntimeException("Ambiguous coefficient")
+  def getGamma: Double = if (onlyEdgeDependent) gamma1 else if (onlyMomentDependent) gamma2 else throw new RuntimeException("Ambiguous coefficient")
 
   def edgeDependent = alpha != 0
 
