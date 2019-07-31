@@ -1,6 +1,8 @@
 package jb.tester
 
-import jb.util.Const.{LABEL, PREDICTION}
+import jb.conf.Config
+import jb.util.Const.{LABEL, PREDICTION, FEATURES}
+import org.apache.spark.ml.classification.RandomForestClassifier
 import org.apache.spark.sql.DataFrame
 
 object FullTester {
@@ -30,6 +32,27 @@ object FullTester {
   def testI(predictions: Array[Double], testSubset: DataFrame): (Double, Double) = {
     val refLabels = getReferenceLabels(testSubset)
     calculateStatistics(predictions, refLabels)
+  }
+
+  def testRF(trainingSubset: DataFrame, testSubset: DataFrame, nClassif: Int): (Double, Double) = {
+    trainingSubset.cache()
+    val predictions = new RandomForestClassifier()
+      .setFeatureSubsetStrategy("auto")
+      .setImpurity(Config.impurity)
+      .setNumTrees(nClassif)
+      .setMaxDepth(Config.maxDepth)
+      .setFeaturesCol(FEATURES)
+      .setLabelCol(LABEL)
+      .fit(trainingSubset)
+      .transform(testSubset)
+      .select(PREDICTION)
+      .collect()
+      .toSeq
+      .map(a => a.get(0).asInstanceOf[Double])
+      .toArray
+    trainingSubset.unpersist()
+    val reference = getReferenceLabels(testSubset)
+    calculateStatistics(predictions, reference)
   }
 
 }

@@ -2,6 +2,7 @@ package jb
 
 import java.util.stream.IntStream
 
+import jb.conf.Config
 import jb.io.FileReader.getRawInput
 import jb.model._
 import jb.model.dt.{CombinedIntegratedDecisionTreeModel, EdgeIntegratedDecisionTreeModel, MomentIntegratedDecisionTreeModel}
@@ -9,7 +10,7 @@ import jb.parser.TreeParser
 import jb.prediction.Predictions.predictBaseClfs
 import jb.selector.FeatureSelectors
 import jb.server.SparkEmbedded
-import jb.tester.FullTester.{testI, testMv}
+import jb.tester.FullTester.{testI, testMv, testRF}
 import jb.util.Const._
 import jb.util.Util._
 import jb.util.functions.DistMappingFunctions._
@@ -42,12 +43,18 @@ class Runner(val nClassif: Int, var nFeatures: Int, val coefficients: Coefficien
     val subsets = input.randomSplit(IntStream.range(0, nSubsets).mapToDouble(_ => 1D / nSubsets).toArray)
     recacheInput2Subsets(input, subsets)
     val (trainingSubsets, cvSubset, testSubset) = dispenseSubsets(subsets)
+    val trainingSubset = unionSubsets(trainingSubsets)
 
-    val dt = new DecisionTreeClassifier().setLabelCol(LABEL).setFeaturesCol(FEATURES)
+    val dt = new DecisionTreeClassifier()
+      .setLabelCol(LABEL)
+      .setFeaturesCol(FEATURES)
+      .setImpurity(Config.impurity)
+      .setMaxDepth(Config.maxDepth)
     val baseModels = trainingSubsets.map(subset => dt.fit(subset))
 
     val testedSubset = predictBaseClfs(baseModels, testSubset)
     val mvQualityMeasure = testMv(testedSubset, nClassif)
+    val rfQualityMeasure = testRF(trainingSubset, testSubset, nClassif)
 
     val edges: Array[Array[Edge]] = if (coefficients.edgeDependent) getEdges(mins, maxes, baseModels) else null
     // TODO: moments - bottleneck
@@ -70,6 +77,7 @@ class Runner(val nClassif: Int, var nFeatures: Int, val coefficients: Coefficien
     clearCache(subsets)
 
     Array(mvQualityMeasure._1, if (mvQualityMeasure._2.isNaN) 0D else mvQualityMeasure._2,
+      rfQualityMeasure._1, if (rfQualityMeasure._2.isNaN) 0D else rfQualityMeasure._2,
       iQualityMeasure._1, if (iQualityMeasure._2.isNaN) 0D else iQualityMeasure._2)
 
   }
