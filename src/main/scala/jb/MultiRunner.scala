@@ -34,7 +34,7 @@ object MultiRunner {
   }
 
   private def getResultCatcher: ResultCatcher = {
-    new LeastBatchExhaustiveResultCatcher(0.4, 10, 150, Integer.MAX_VALUE)
+    new LeastBatchExhaustiveResultCatcher(0.4, 10, 150, 350)
   }
 
 }

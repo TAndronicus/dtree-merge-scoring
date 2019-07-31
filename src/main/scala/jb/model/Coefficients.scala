@@ -23,13 +23,13 @@ class Coefficients(
 
   def getGamma: Double = if (onlyEdgeDependent) gamma1 else if (onlyMomentDependent) gamma2 else throw new RuntimeException("Ambiguous coefficient")
 
-  def edgeDependent = alpha != 0
+  def edgeDependent: Boolean = alpha != 0
 
-  def onlyEdgeDependent = alpha == 1
+  def onlyEdgeDependent: Boolean = alpha == 1
 
-  def momentDependent = alpha != 1
+  def momentDependent: Boolean = alpha != 1
 
-  def onlyMomentDependent = alpha == 0
+  def onlyMomentDependent: Boolean = alpha == 0
 
   def getAllCoefficients = Array(alpha, beta1, beta2, gamma1, gamma2)
 

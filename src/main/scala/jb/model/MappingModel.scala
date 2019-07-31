@@ -1,6 +1,6 @@
 package jb.model
 
-abstract class MappingModel
+sealed abstract class MappingModel
 
 case class PreTraining() extends MappingModel // All objects by given labels
 case class PostTrainingCV() extends MappingModel // CV objects by all predictions
