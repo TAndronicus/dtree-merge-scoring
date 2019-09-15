@@ -1,5 +1,6 @@
 package jb
 
+import jb.conf.Config
 import jb.model.{Coefficients, MappingModel}
 import jb.util.Const.FILENAME_PREFIX
 import jb.util.result.{LeastBatchExhaustiveResultCatcher, ResultCatcher}
@@ -34,7 +35,7 @@ object MultiRunner {
   }
 
   private def getResultCatcher: ResultCatcher = {
-    new LeastBatchExhaustiveResultCatcher(0.4, 10, 150, 350)
+    new LeastBatchExhaustiveResultCatcher(Config.treshold, Config.batch, Config.minIter, Config.maxIter)
   }
 
 }

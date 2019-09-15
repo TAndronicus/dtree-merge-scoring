@@ -9,7 +9,7 @@ object ExperimentPlan {
     SparkEmbedded.setLogError()
     val nClassifs = Array(3, 5, 7, 9)
     val nFeatures = 2
-    val alphas = Array(1, .7, .3, 0)
+    val alphas = Array(0, .3, .7, 1)
     val (beta1, beta2) = (.5, 0)
     val (gamma1, gamma2) = (20, 5)
     for (nC <- nClassifs; alpha <- alphas) {
