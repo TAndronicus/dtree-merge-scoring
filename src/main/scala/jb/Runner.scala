@@ -58,6 +58,7 @@ class Runner(val nClassif: Int, var nFeatures: Int, val coefficients: Coefficien
 
     val edges: Array[Array[Edge]] = if (coefficients.edgeDependent) getEdges(mins, maxes, baseModels) else null
     // TODO: moments - bottleneck
+    // TODO: batch by moments calculation method
     val moments = if (coefficients.momentDependent) mappingModel match {
       case PreTraining() => calculateMomentsByLabels(input, getSelectedFeatures(dataPrepModel))
       case PostTrainingCV() => calculateMomentsByPredictionCollectively(cvSubset, getSelectedFeatures(dataPrepModel), baseModels, false)
