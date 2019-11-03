@@ -3,9 +3,9 @@ package jb.model
 class Coefficients(
                     val alpha: Double,
                     val beta1: Double, // edge
-                    val beta2: Double, // mapping
+                    val beta2: Double, // moment
                     val gamma1: Double, // edge
-                    val gamma2: Double // mapping
+                    val gamma2: Double // moment
                   ) {
 
   def validate(): Unit = {

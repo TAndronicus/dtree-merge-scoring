@@ -65,7 +65,7 @@ object Util {
     (trainingSubsets, cvSubset, testSubset)
   }
 
-  def unionSubsets(subsets: Array[DataFrame]): DataFrame ={
+  def unionSubsets(subsets: Array[DataFrame]): DataFrame = {
     subsets.reduce((s1, s2) => s1.union(s2))
   }
 
@@ -116,6 +116,7 @@ object Util {
     * @param input            dataset
     * @param selectedFeatures columns to aggregate
     * @param baseModels       models to predict
+    * @param filterLabels     take into consideration only properly classifier objects
     * @return dataset with summed moments with the following schema:
     *         |-------|-------|---------|---------|
     *         | label | count | sum(x1) | sum(x2) |

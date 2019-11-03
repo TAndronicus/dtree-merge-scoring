@@ -7,9 +7,9 @@ object Config {
   val impurity = "gini"
 
   /** Result catcher */
-  val treshold: Double = .3
-  val batch: Int = 4
-  val minIter: Int = 50
+  val treshold: Double = .4
+  val batch: Int = 10
+  val minIter: Int = 10
   val maxIter: Int = Int.MaxValue
 
 }
