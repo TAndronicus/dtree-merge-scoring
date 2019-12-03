@@ -35,6 +35,14 @@ class Coefficients(
 
   override def toString: String = s"alpha: ${alpha}, beta1: ${beta1}, beta2: ${beta2}, gamma1: ${gamma1}, gamma2: ${gamma2}"
 
+  override def equals(obj: Any): Boolean =
+    obj.isInstanceOf[Coefficients] &&
+      this.alpha == obj.asInstanceOf[Coefficients].alpha &&
+      this.beta1 == obj.asInstanceOf[Coefficients].beta1 &&
+      this.beta2 == obj.asInstanceOf[Coefficients].beta2 &&
+      this.gamma1 == obj.asInstanceOf[Coefficients].gamma1 &&
+      this.gamma2 == obj.asInstanceOf[Coefficients].gamma2
+
 }
 
 object Coefficients {
@@ -52,5 +60,10 @@ object Coefficients {
     gamma1,
     gamma2
   )
+
+  def fromArray(coefficients: Double*) = {
+    require(coefficients.length == 5)
+    new Coefficients(coefficients(0), coefficients(1), coefficients(2), coefficients(3), coefficients(4))
+  }
 
 }
