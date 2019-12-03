@@ -8,8 +8,11 @@ object Config {
 
   /** Result catcher */
   val treshold: Double = .4
-  val batch: Int = 10
+  val batch: Int = 4
   val minIter: Int = 10
-  val maxIter: Int = Int.MaxValue
+  val maxIter: Int = 200
+
+  /** Other */
+  val recalculate = false
 
 }

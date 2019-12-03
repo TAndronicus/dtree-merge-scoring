@@ -22,7 +22,7 @@ object ExperimentPlan {
     val calculated = getAlreadyCalculated
     for (nC <- nClassifs; alpha <- alphas; beta1 <- betas; beta2 <- betas; gamma1 <- gammas; gamma2 <- gammas) {
       val coeffs = Coefficients(alpha, beta1, beta2, gamma1, gamma2)
-      if (!Config.recalculate || !calculated.contains(coeffs)) {
+      if (Config.recalculate || !calculated.contains(coeffs)) {
         MultiRunner.run(nC, nFeatures, coeffs, PreTraining())
       } else {
         println("Already calculated: " + nC + " classifiers, " + coeffs)
