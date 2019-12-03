@@ -33,6 +33,8 @@ class Coefficients(
 
   def getAllCoefficients = Array(alpha, beta1, beta2, gamma1, gamma2)
 
+  override def toString: String = s"alpha: ${alpha}, beta1: ${beta1}, beta2: ${beta2}, gamma1: ${gamma1}, gamma2: ${gamma2}"
+
 }
 
 object Coefficients {
