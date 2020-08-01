@@ -14,5 +14,6 @@ object Config {
 
   /** Other */
   val recalculate = false
+  val joinTrainingAndValidationSets = true
 
 }
