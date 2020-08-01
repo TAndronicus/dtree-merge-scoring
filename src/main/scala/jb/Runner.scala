@@ -43,7 +43,7 @@ class Runner(val nClassif: Int, var nFeatures: Int, val coefficients: Coefficien
     val subsets = input.randomSplit(IntStream.range(0, nSubsets).mapToDouble(_ => 1D / nSubsets).toArray)
     recacheInput2Subsets(input, subsets)
     val (trainingSubsets, cvSubset, testSubset) = dispenseSubsets(subsets)
-    val trainingSubset = unionSubsets(trainingSubsets)
+    val trainingSubset = if (Config.joinTrainingAndValidationSets) unionSubsets(trainingSubsets :+ cvSubset) else unionSubsets(trainingSubsets)
 
     val dt = new DecisionTreeClassifier()
       .setLabelCol(LABEL)
