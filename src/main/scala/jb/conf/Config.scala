@@ -3,7 +3,7 @@ package jb.conf
 object Config {
 
   /** Models */
-  val maxDepth: Int = 3
+  val maxDepth: Int = 5
   val impurity = "gini"
 
   /** Result catcher */

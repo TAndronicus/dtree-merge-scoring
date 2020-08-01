@@ -3,14 +3,43 @@ package jb
 import jb.conf.Config
 import jb.model.{Coefficients, MappingModel}
 import jb.util.Const.FILENAME_PREFIX
-import jb.util.result.{LeastBatchExhaustiveResultCatcher, ResultCatcher}
+import jb.util.result.{GeneralCatcher, LeastBatchExhaustiveResultCatcher, ResultCatcher}
 
 object MultiRunner {
 
 
   def run(nClassif: Int, nFeatures: Int, coefficients: Coefficients, mappingModel: MappingModel): Unit = {
     coefficients.validate()
-    val filenames = Array("bi", "bu", "c", "d", "h", "i", "m", "p", "se", "wd", "wi")
+    val filenames = Array(
+      "aa",
+      "ap",
+      "ba",
+      "bi",
+      "bu",
+      "c",
+      "d",
+      "ec",
+      "h",
+      "i",
+      "ir",
+      "m",
+      "ma",
+      "p",
+      "ph",
+      "pi",
+      "ri",
+      "sb",
+      "se",
+      "t",
+      "te",
+      "th",
+      "ti",
+      "wd",
+      "wi",
+      "wr",
+      "ww",
+      "ye"
+    )
 
     val runner = new Runner(nClassif, nFeatures, coefficients, mappingModel)
     val resultCatcher = runForFiles(runner)(filenames)
@@ -35,7 +64,7 @@ object MultiRunner {
   }
 
   private def getResultCatcher: ResultCatcher = {
-    new LeastBatchExhaustiveResultCatcher(Config.treshold, Config.batch, Config.minIter, Config.maxIter)
+    new GeneralCatcher(Config.treshold, Config.batch, Config.minIter, Config.maxIter)
   }
 
 }
