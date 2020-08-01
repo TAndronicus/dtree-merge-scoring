@@ -77,10 +77,8 @@ class Runner(val nClassif: Int, var nFeatures: Int, val coefficients: Coefficien
 
     clearCache(subsets)
 
-    Array(mvQualityMeasure._1, if (mvQualityMeasure._2.isNaN) 0D else mvQualityMeasure._2, mvQualityMeasure._3, mvQualityMeasure._4,
-      rfQualityMeasure._1, if (rfQualityMeasure._2.isNaN) 0D else rfQualityMeasure._2, rfQualityMeasure._3, rfQualityMeasure._4,
-      iQualityMeasure._1, if (iQualityMeasure._2.isNaN) 0D else iQualityMeasure._2, iQualityMeasure._3, iQualityMeasure._4)
-
+    Array(mvQualityMeasure, rfQualityMeasure, iQualityMeasure)
+      .flatMap(_.toArray)
   }
 
   private def getEdges(mins: Array[Double], maxes: Array[Double], baseModels: Array[DecisionTreeClassificationModel]): Array[Array[Edge]] = {
