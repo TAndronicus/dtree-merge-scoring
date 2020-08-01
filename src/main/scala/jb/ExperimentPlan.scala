@@ -3,7 +3,7 @@ package jb
 import java.io.File
 
 import jb.conf.Config
-import jb.model.{Coefficients, PreTraining}
+import jb.model.{Coefficients, PostTrainingTrainFiltered}
 import jb.server.SparkEmbedded
 import jb.util.Const
 
@@ -23,7 +23,7 @@ object ExperimentPlan {
     for (nC <- nClassifs; alpha <- alphas; beta1 <- betas; beta2 <- betas; gamma1 <- gammas; gamma2 <- gammas) {
       val coeffs = Coefficients(alpha, beta1, beta2, gamma1, gamma2)
       if (Config.recalculate || !calculated.contains(coeffs)) {
-        MultiRunner.run(nC, nFeatures, coeffs, PreTraining())
+        MultiRunner.run(nC, nFeatures, coeffs, PostTrainingTrainFiltered())
       } else {
         println("Already calculated: " + nC + " classifiers, " + coeffs)
       }
