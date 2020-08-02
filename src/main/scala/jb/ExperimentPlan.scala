@@ -16,8 +16,6 @@ object ExperimentPlan {
     val alphas = Array(0, .3, .7, 1)
     val betas = Array(0, .5)
     val gammas = Array(5, 20)
-    //    val (beta1, beta2) = (.5, 0)
-    //    val (gamma1, gamma2) = (20, 5)
 
     val calculated = getAlreadyCalculated
     for (nC <- nClassifs; alpha <- alphas; beta1 <- betas; beta2 <- betas; gamma1 <- gammas; gamma2 <- gammas) {
