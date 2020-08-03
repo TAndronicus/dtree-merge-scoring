@@ -8,6 +8,7 @@ import jb.model._
 import jb.model.dt.{CombinedIntegratedDecisionTreeModel, EdgeIntegratedDecisionTreeModel, MomentIntegratedDecisionTreeModel}
 import jb.parser.TreeParser
 import jb.prediction.Predictions.predictBaseClfs
+import jb.scaler.FeatureScalers
 import jb.selector.FeatureSelectors
 import jb.server.SparkEmbedded
 import jb.tester.FullTester.{testI, testMv, testRF}
@@ -27,13 +28,15 @@ class Runner(val nClassif: Int, var nFeatures: Int, val coefficients: Coefficien
     SparkEmbedded.ss.sqlContext.clearCache()
 
     var input = getRawInput(filename, "csv")
+    input = densifyLabel(input)
     if (nFeatures > input.columns.length - 1) {
       this.nFeatures = input.columns.length - 1
       println(s"Setting nFeatures to $nFeatures")
     }
     val featureVectorizer = getFeatureVectorizer(input.columns)
     val featureSelector = FeatureSelectors.get_chi_sq_selector(nFeatures)
-    val dataPrepPipeline = new Pipeline().setStages(Array(featureVectorizer, featureSelector))
+    val scaler = FeatureScalers.minMaxScaler
+    val dataPrepPipeline = new Pipeline().setStages(Array(featureVectorizer, featureSelector, scaler))
     val dataPrepModel = dataPrepPipeline.fit(input)
     input = optimizeInput(input, dataPrepModel)
 
@@ -45,12 +48,13 @@ class Runner(val nClassif: Int, var nFeatures: Int, val coefficients: Coefficien
     val (trainingSubsets, cvSubset, testSubset) = dispenseSubsets(subsets)
     val trainingSubset = if (Config.joinTrainingAndValidationSets) unionSubsets(trainingSubsets :+ cvSubset) else unionSubsets(trainingSubsets)
 
-    val dt = new DecisionTreeClassifier()
+    def getCleanDT = new DecisionTreeClassifier()
       .setLabelCol(LABEL)
       .setFeaturesCol(FEATURES)
       .setImpurity(Config.impurity)
       .setMaxDepth(Config.maxDepth)
-    val baseModels = trainingSubsets.map(subset => dt.fit(subset))
+
+    val baseModels = trainingSubsets.map(subset => getCleanDT.fit(subset))
 
     val testedSubset = predictBaseClfs(baseModels, testSubset)
     val mvQualityMeasure = testMv(testedSubset, nClassif)

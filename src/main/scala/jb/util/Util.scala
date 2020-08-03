@@ -13,9 +13,25 @@ import scala.collection.mutable
 
 object Util {
 
+  def densifyLabel(input: DataFrame): DataFrame = {
+    val columnMapping = input.select(Const.SPARSE_LABEL)
+      .orderBy(Const.SPARSE_LABEL)
+      .dropDuplicates()
+      .collect()
+      .map(_.get(0).toString)
+      .zipWithIndex
+      .toMap
+    val mapper = columnMapping(_)
+    input.withColumn(Const.LABEL, udf(mapper)
+      .apply(col(SPARSE_LABEL)))
+      .drop(Const.SPARSE_LABEL)
+  }
+
   def requireNormalized(mins: Array[Double], maxes: Array[Double]) = {
-    for (min <- mins) require(min == 0)
-    for (max <- maxes) require(max == 1)
+    println(s"mins: ${mins.mkString(",")}")
+    //    for (min <- mins) require(min == 0)
+    println(s"maxes: ${maxes.mkString(",")}")
+    //    for (max <- maxes) require(max == 1)
   }
 
   def getExtrema(input: DataFrame, selectedFeatures: Array[Int]): (Array[Double], Array[Double]) = {
@@ -32,7 +48,8 @@ object Util {
   }
 
   def optimizeInput(input: DataFrame, dataPrepModel: PipelineModel): DataFrame = {
-    dataPrepModel.transform(input).select(
+    val transformed = dataPrepModel.transform(input)
+    transformed.select(
       Util.getSelectedFeatures(dataPrepModel).map(
         item => col(COL_PREFIX + item)
       ).+:(col(FEATURES)).+:(col(LABEL)): _*

@@ -5,6 +5,7 @@ object Config {
   /** Models */
   val maxDepth: Int = 5
   val impurity = "gini"
+  val datasetSize = 10000
 
   /** Result catcher */
   val treshold: Double = .4
