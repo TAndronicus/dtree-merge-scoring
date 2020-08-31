@@ -1,4 +1,4 @@
-package jb.model
+package jb.model.experiment
 
 class Coefficients(
                     val alpha: Double,

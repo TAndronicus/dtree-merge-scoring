@@ -6,6 +6,7 @@ import jb.conf.Config
 import jb.io.FileReader.getRawInput
 import jb.model._
 import jb.model.dt.{CombinedIntegratedDecisionTreeModel, EdgeIntegratedDecisionTreeModel, MomentIntegratedDecisionTreeModel}
+import jb.model.experiment.Coefficients
 import jb.parser.TreeParser
 import jb.prediction.Predictions.predictBaseClfs
 import jb.scaler.FeatureScalers

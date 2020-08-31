@@ -1,9 +1,10 @@
 package jb
 
 import jb.conf.Config
-import jb.model.{Coefficients, MappingModel}
+import jb.model.MappingModel
+import jb.model.experiment.Coefficients
 import jb.util.Const.FILENAME_PREFIX
-import jb.util.result.{GeneralCatcher, LeastBatchExhaustiveResultCatcher, ResultCatcher}
+import jb.util.result.{GeneralCatcher, ResultCatcher}
 
 object MultiRunner {
 

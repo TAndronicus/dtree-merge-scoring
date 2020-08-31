@@ -1,6 +1,6 @@
 package jb.util.functions
 
-import jb.model.Coefficients
+import jb.model.experiment.Coefficients
 
 object DistMappingFunctions {
 

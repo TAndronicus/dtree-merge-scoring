@@ -3,7 +3,8 @@ package jb
 import java.io.File
 
 import jb.conf.Config
-import jb.model.{Coefficients, PostTrainingTrainFiltered}
+import jb.model.PostTrainingTrainFiltered
+import jb.model.experiment.{Coefficients, Scenario}
 import jb.server.SparkEmbedded
 import jb.util.Const
 
@@ -20,7 +21,8 @@ object ExperimentPlan {
     val calculated = getAlreadyCalculated
     for (nC <- nClassifs; alpha <- alphas; beta1 <- betas; beta2 <- betas; gamma1 <- gammas; gamma2 <- gammas) {
       val coeffs = Coefficients(alpha, beta1, beta2, gamma1, gamma2)
-      if (Config.recalculate || !calculated.contains(coeffs)) {
+      val scenario = Scenario(coeffs, nC)
+      if (Config.recalculate || !calculated.contains(scenario)) {
         MultiRunner.run(nC, nFeatures, coeffs, PostTrainingTrainFiltered())
       } else {
         println("Already calculated: " + nC + " classifiers, " + coeffs)
@@ -28,12 +30,11 @@ object ExperimentPlan {
     }
   }
 
-  def getAlreadyCalculated: Array[Coefficients] = {
+  def getAlreadyCalculated: Array[Scenario] = {
     new File(Const.RESULT_PREFIX)
       .list()
-      .map(_.split("_").tail)
-      .map(_.map(_.toDouble))
-      .map(Coefficients.fromArray(_: _*))
+      .map(_.split("_"))
+      .map(ar => Scenario(Coefficients.fromArray(ar.tail.map(_.toDouble): _*), Integer.parseInt(ar.head)))
   }
 
 }
